@@ -1,4 +1,4 @@
-DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+DB_URL=postgresql://root:secret@localhost:5432/future_bank?sslmode=disable
 
 network:
 	docker network create bank-network
@@ -10,10 +10,10 @@ mysql:
 	docker run --name mysql8 -p 3306:3306  -e MYSQL_ROOT_PASSWORD=secret -d mysql:8
 
 createdb:
-	docker exec -it postgres createdb --username=root --owner=root simple_bank
+	docker exec -it postgres createdb --username=root --owner=root future_bank
 
 dropdb:
-	docker exec -it postgres dropdb simple_bank
+	docker exec -it postgres dropdb future_bank
 
 migrateup:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
@@ -46,8 +46,8 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/techschool/simplebank/db/sqlc Store
-	mockgen -package mockwk -destination worker/mock/distributor.go github.com/techschool/simplebank/worker TaskDistributor
+	mockgen -package mockdb -destination db/mock/store.go github.com/techschool/futurebank/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributor.go github.com/techschool/futurebank/worker TaskDistributor
 
 proto:
 	rm -f pb/*.go
@@ -55,7 +55,7 @@ proto:
 	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
 	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative \
-	--openapiv2_out=doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
+	--openapiv2_out=doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=future_bank \
 	proto/*.proto
 	statik -src=./doc/swagger -dest=./doc
 

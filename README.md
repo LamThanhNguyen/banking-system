@@ -47,3 +47,74 @@ Future Bank. Tech: Golang, Redis, K8s
     ```bash
     make createdb
     ```
+
+- Run db migration up all versions:
+
+    ```bash
+    make migrateup
+    ```
+
+- Run db migration up 1 version:
+
+    ```bash
+    make migrateup1
+    ```
+
+- Run db migration down all versions:
+
+    ```bash
+    make migratedown
+    ```
+
+- Run db migration down 1 version:
+
+    ```bash
+    make migratedown1
+    ```
+
+- Start the redis:
+    ```bash
+    make redis
+    ```
+
+- Create the .env file and fill in the information:
+    ```bash
+    ENVIRONMENT=development
+    ALLOWED_ORIGINS=
+    DB_SOURCE=
+    MIGRATION_URL=
+    HTTP_SERVER_ADDRESS=
+    TOKEN_SYMMETRIC_KEY=
+    ACCESS_TOKEN_DURATION=15m
+    REFRESH_TOKEN_DURATION=24h
+    REDIS_ADDRESS=
+    EMAIL_SENDER_NAME=
+    EMAIL_SENDER_ADDRESS=
+    EMAIL_SENDER_PASSWORD=
+    ```
+
+### How to generate code
+
+- Generate SQL CRUD with sqlc:
+
+    ```bash
+    make sqlc
+    ```
+
+- Init Go module
+
+    ```bash
+    go mod init github.com/LamThanhNguyen/future-bank
+    ```
+
+- Install package
+
+    ```
+    go get github.com/some/library
+    ```
+
+- Add module requirements and sums
+
+    ```
+    go mod tidy
+    ```
