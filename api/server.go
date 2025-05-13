@@ -36,7 +36,12 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 }
 
 func (server *Server) SetupRouter() {
-	router := gin.Default()
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+
+	router.Use(gin.Recovery())
+
+	router.Use(HttpLogger())
 
 	// CORS middleware
 	router.Use(cors.New(cors.Config{
@@ -47,8 +52,6 @@ func (server *Server) SetupRouter() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-
-	router.Use(gin.Logger())
 
 	router.Static("/swagger", "./swagger")
 
@@ -67,10 +70,6 @@ func (server *Server) Router() *gin.Engine {
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
-
-// func errorResponse(err error) gin.H {
-// 	return gin.H{"error": err.Error()}
-// }
 
 func (server *Server) handleHealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
