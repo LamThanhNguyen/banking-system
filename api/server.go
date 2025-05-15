@@ -56,6 +56,8 @@ func (server *Server) SetupRouter() {
 	router.Static("/swagger", "./swagger")
 
 	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+	router.POST("/tokens/renew_access", server.renewAccessToken)
 
 	apiRoutes := router.Group("/api")
 	{
