@@ -6,6 +6,7 @@ require (
 	github.com/aead/chacha20poly1305 v0.0.0-20170617001512-233f39982aeb
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-playground/validator/v10 v10.26.0
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/uuid v1.6.0
 	github.com/hibiken/asynq v0.25.1
@@ -15,6 +16,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/viper v1.20.1
+	golang.org/x/crypto v0.36.0
 	golang.org/x/sync v0.14.0
 )
 
@@ -31,7 +33,6 @@ require (
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.26.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -60,7 +61,6 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/arch v0.15.0 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect

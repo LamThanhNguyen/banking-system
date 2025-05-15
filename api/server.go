@@ -55,6 +55,8 @@ func (server *Server) SetupRouter() {
 
 	router.Static("/swagger", "./swagger")
 
+	router.POST("/users", server.createUser)
+
 	apiRoutes := router.Group("/api")
 	{
 		apiRoutes.GET("/health", server.handleHealthCheck)
@@ -73,4 +75,8 @@ func (server *Server) Start(address string) error {
 
 func (server *Server) handleHealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+}
+
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }
