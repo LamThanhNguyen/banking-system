@@ -106,25 +106,6 @@ func (server *Server) createUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
-func humanMessage(fe validator.FieldError) string {
-	switch fe.Tag() {
-	case "required":
-		return "is required"
-	case "min":
-		return "must be at least " + fe.Param() + " characters"
-	case "max":
-		return "must be at most " + fe.Param() + " characters"
-	case "username":
-		return "must contain only lowercase letters, digits or underscore"
-	case "fullname":
-		return "must contain only letters or spaces"
-	case "email":
-		return "is not a valid email address"
-	default:
-		return fe.Error() // fallback
-	}
-}
-
 type loginUserRequest struct {
 	Username string `json:"username" binding:"required,username"`     // custom tag
 	Password string `json:"password" binding:"required,min=8,max=50"` // built-in tags
@@ -223,4 +204,23 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		User:                  newUserResponse(user),
 	}
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+func humanMessage(fe validator.FieldError) string {
+	switch fe.Tag() {
+	case "required":
+		return "is required"
+	case "min":
+		return "must be at least " + fe.Param() + " characters"
+	case "max":
+		return "must be at most " + fe.Param() + " characters"
+	case "username":
+		return "must contain only lowercase letters, digits or underscore"
+	case "fullname":
+		return "must contain only letters or spaces"
+	case "email":
+		return "is not a valid email address"
+	default:
+		return fe.Error() // fallback
+	}
 }
