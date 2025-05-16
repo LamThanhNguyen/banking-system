@@ -36,32 +36,41 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 }
 
 func (server *Server) SetupRouter() {
-	gin.SetMode(gin.ReleaseMode)
+	if server.config.Environment == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+	}
+
 	router := gin.New()
 
-	router.Use(gin.Recovery())
-
-	router.Use(HttpLogger())
-
-	// CORS middleware
-	router.Use(cors.New(cors.Config{
+	corsCfg := cors.Config{
 		AllowOrigins:     server.config.AllowedOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}))
+	}
+
+	// CORS middleware
+	router.Use(
+		gin.Recovery(),
+		HttpLogger(),
+		cors.New(corsCfg),
+	)
 
 	router.Static("/swagger", "./swagger")
 
-	router.POST("/users", server.createUser)
-	router.POST("/users/login", server.loginUser)
-	router.POST("/tokens/renew_access", server.renewAccessToken)
-
-	apiRoutes := router.Group("/api")
+	apiRoutes := router.Group("/api/v1")
 	{
 		apiRoutes.GET("/health", server.handleHealthCheck)
+		apiRoutes.POST("/users", server.createUser)
+		apiRoutes.POST("/users/login", server.loginUser)
+		apiRoutes.POST("/tokens/renew_access", server.renewAccessToken)
+
+		authRoutes := apiRoutes.Group("", authMiddleware(server.tokenMaker))
+		authRoutes.POST("/accounts", server.createAccount)
 	}
 
 	server.router = router
