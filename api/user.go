@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type FieldViolation struct {
@@ -203,6 +204,85 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		RefreshTokenExpiresAt: refreshPayload.ExpiredAt,
 		User:                  newUserResponse(user),
 	}
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+type updateUserRequest struct {
+	Username string  `json:"username" binding:"required,username"`                // custom tag
+	Password *string `json:"password,omitempty" binding:"omitempty,min=8,max=50"` // built-in tags
+	FullName *string `json:"full_name,omitempty" binding:"omitempty,fullname"`    // custom tag
+	Email    *string `json:"email,omitempty" binding:"omitempty,email,max=50"`    // built-in
+}
+
+func (server *Server) updateUser(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationHeaderKey).(*token.Payload)
+
+	var req updateUserRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			violations := make([]FieldViolation, 0, len(ve))
+			for _, fe := range ve {
+				violations = append(violations, FieldViolation{
+					Field:   fe.Field(),
+					Message: humanMessage(fe),
+				})
+			}
+			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
+		}
+		return
+	}
+
+	// banker role can update other user's info
+	// depositor only update their's info
+	if authPayload.Role != util.BankerRole && authPayload.Username != req.Username {
+		err := fmt.Errorf("depositor cannot update other user's info")
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateUserParams{
+		Username: req.Username,
+		FullName: pgtype.Text{
+			String: *req.FullName,
+			Valid:  req.FullName != nil,
+		},
+		Email: pgtype.Text{
+			String: *req.Email,
+			Valid:  req.Email != nil,
+		},
+	}
+
+	if req.Password != nil {
+		hashedPassword, err := util.HashPassword(*req.Password)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+
+		arg.HashedPassword = pgtype.Text{
+			String: hashedPassword,
+			Valid:  true,
+		}
+
+		arg.PasswordChangedAt = pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+
+	user, err := server.store.UpdateUser(ctx, arg)
+	if err != nil {
+		if errors.Is(err, db.ErrRecordNotFound) {
+			err := fmt.Errorf("user not found")
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+
+	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, rsp)
 }
 

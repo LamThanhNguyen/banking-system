@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/LamThanhNguyen/future-bank/token"
+	"github.com/LamThanhNguyen/future-bank/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -49,6 +50,30 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 		}
 
 		ctx.Set(authorizationPayloadKey, payload)
+		ctx.Next()
+	}
+}
+
+func Require(perm string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		p, ok := ctx.Get(authorizationPayloadKey)
+
+		if !ok {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized,
+				gin.H{"error": "missing auth payload"},
+			)
+			return
+		}
+
+		payload := p.(*token.Payload)
+
+		if !util.HasPermission(payload.Role, perm) {
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				gin.H{"error": "forbidden"},
+			)
+			return
+		}
+
 		ctx.Next()
 	}
 }

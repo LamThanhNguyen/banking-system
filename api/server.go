@@ -70,10 +70,31 @@ func (server *Server) SetupRouter() {
 		apiRoutes.POST("/tokens/renew_access", server.renewAccessToken)
 
 		authRoutes := apiRoutes.Group("", authMiddleware(server.tokenMaker))
-		authRoutes.POST("/accounts", server.createAccount)
-		authRoutes.GET("/accounts/:id", server.getAccount)
-		authRoutes.GET("/accounts", server.listAccounts)
-		authRoutes.POST("/transfers", server.createTransfer)
+		authRoutes.PATCH(
+			"/users/update",
+			Require("users:update"),
+			server.updateUser,
+		)
+		authRoutes.POST(
+			"/accounts",
+			Require("accounts:create"),
+			server.createAccount,
+		)
+		authRoutes.GET(
+			"/accounts/:id",
+			Require("accounts:read"),
+			server.getAccount,
+		)
+		authRoutes.GET(
+			"/accounts",
+			Require("accounts:list"),
+			server.listAccounts,
+		)
+		authRoutes.POST(
+			"/transfers",
+			Require("transfers:create"),
+			server.createTransfer,
+		)
 	}
 
 	server.router = router
