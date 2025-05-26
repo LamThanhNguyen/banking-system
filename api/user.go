@@ -235,11 +235,21 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
-	// banker role can update other user's info
-	// depositor only update their's info
-	if authPayload.Role != util.BankerRole && authPayload.Username != req.Username {
-		err := fmt.Errorf("depositor cannot update other user's info")
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
+	sub := util.Subject{
+		Role: authPayload.Role,
+		Name: authPayload.Username,
+	}
+	obj := util.Object{
+		Name: req.Username,
+	}
+
+	ok, err := server.enforcer.Enforce(sub, obj, "users:update")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	if !ok {
+		ctx.JSON(http.StatusForbidden, errorResponse(fmt.Errorf("forbidden")))
 		return
 	}
 

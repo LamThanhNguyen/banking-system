@@ -54,7 +54,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	}
 }
 
-func Require(perm string) gin.HandlerFunc {
+func (s *Server) Require(action string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		p, ok := ctx.Get(authorizationPayloadKey)
 
@@ -67,11 +67,16 @@ func Require(perm string) gin.HandlerFunc {
 
 		payload := p.(*token.Payload)
 
-		if !util.HasPermission(payload.Role, perm) {
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				gin.H{"error": "forbidden"},
-			)
+		sub := util.Subject{Role: payload.Role, Name: payload.Username}
+		obj := util.Object{Name: "*"}
+		ok2, err := s.enforcer.Enforce(sub, obj, action)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
+		}
+
+		if !ok2 {
+			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		}
 
 		ctx.Next()

@@ -9,6 +9,7 @@ import (
 	"github.com/LamThanhNguyen/future-bank/token"
 	"github.com/LamThanhNguyen/future-bank/util"
 	"github.com/LamThanhNguyen/future-bank/worker"
+	"github.com/casbin/casbin/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -16,12 +17,18 @@ import (
 type Server struct {
 	config          util.Config
 	store           db.Store
-	tokenMaker      token.Maker
+	enforcer        *casbin.Enforcer
 	router          *gin.Engine
+	tokenMaker      token.Maker
 	taskDistributor worker.TaskDistributor
 }
 
-func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDistributor) (*Server, error) {
+func NewServer(
+	config util.Config,
+	store db.Store,
+	enforcer *casbin.Enforcer,
+	taskDistributor worker.TaskDistributor,
+) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -30,6 +37,7 @@ func NewServer(config util.Config, store db.Store, taskDistributor worker.TaskDi
 	return &Server{
 		config:          config,
 		store:           store,
+		enforcer:        enforcer,
 		tokenMaker:      tokenMaker,
 		taskDistributor: taskDistributor,
 	}, nil
@@ -72,27 +80,27 @@ func (server *Server) SetupRouter() {
 		authRoutes := apiRoutes.Group("", authMiddleware(server.tokenMaker))
 		authRoutes.PATCH(
 			"/users/update",
-			Require("users:update"),
+			server.Require("users:update"),
 			server.updateUser,
 		)
 		authRoutes.POST(
 			"/accounts",
-			Require("accounts:create"),
+			server.Require("accounts:create"),
 			server.createAccount,
 		)
 		authRoutes.GET(
 			"/accounts/:id",
-			Require("accounts:read"),
+			server.Require("accounts:read"),
 			server.getAccount,
 		)
 		authRoutes.GET(
 			"/accounts",
-			Require("accounts:list"),
+			server.Require("accounts:list"),
 			server.listAccounts,
 		)
 		authRoutes.POST(
 			"/transfers",
-			Require("transfers:create"),
+			server.Require("transfers:create"),
 			server.createTransfer,
 		)
 	}

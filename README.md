@@ -101,6 +101,12 @@ Future Bank. Tech: Golang, Redis, K8s
     make sqlc
     ```
 
+- Create a new db migration:
+
+  ```bash
+  make new_migration name=<migration_name>
+  ```
+
 - Init Go module
 
     ```bash

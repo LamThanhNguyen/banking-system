@@ -12,9 +12,10 @@ import (
 	"github.com/LamThanhNguyen/future-bank/api"
 	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
 	"github.com/LamThanhNguyen/future-bank/mail"
+	pgxadapter "github.com/LamThanhNguyen/future-bank/pgxadapter"
 	"github.com/LamThanhNguyen/future-bank/util"
 	"github.com/LamThanhNguyen/future-bank/worker"
-	"github.com/golang-migrate/migrate/v4"
+	"github.com/casbin/casbin/v2"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
@@ -43,7 +44,20 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 
-	runDBMigration(config.MigrationURL, config.DBSource)
+	casbin_adapter, err := pgxadapter.New(ctx, connPool)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create casbin adapter")
+	}
+
+	casbin_enforcer, err := casbin.NewEnforcer("model.conf", casbin_adapter)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create casbin enforcer")
+	}
+	casbin_enforcer.EnableAutoSave(true)
+
+	if err := seedPolicies(casbin_enforcer); err != nil {
+		log.Fatal().Err(err).Msg("cannot seed Policies")
+	}
 
 	store := db.NewStore(connPool)
 
@@ -56,7 +70,7 @@ func main() {
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
 	runTaskProcessor(ctx, waitGroup, config, redisOpt, store)
-	runServer(ctx, waitGroup, config, store, taskDistributor)
+	runServer(ctx, waitGroup, config, store, casbin_enforcer, taskDistributor)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -65,17 +79,16 @@ func main() {
 	log.Info().Msg("application shutdown complete")
 }
 
-func runDBMigration(migrationURL string, dbSource string) {
-	migration, err := migrate.New(migrationURL, dbSource)
-	if err != nil {
-		log.Fatal().Err(err).Msg("cannot create new migrate instance")
-	}
-
-	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal().Err(err).Msg("failed to run migrate up")
-	}
-
-	log.Info().Msg("db migrated successfully")
+func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
+	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "create")
+	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "read")
+	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "list")
+	_, _ = casbin_enforcer.AddPolicy("banker", "users", "update")
+	_, _ = casbin_enforcer.AddPolicy("banker", "transfers", "create")
+	_, _ = casbin_enforcer.AddPolicy("depositor", "accounts", "read")
+	_, _ = casbin_enforcer.AddPolicy("depositor", "users", "update")
+	_, _ = casbin_enforcer.AddPolicy("depositor", "transfers", "create")
+	return nil
 }
 
 func runTaskProcessor(
@@ -109,9 +122,10 @@ func runServer(
 	waitGroup *errgroup.Group,
 	config util.Config,
 	store db.Store,
+	enforcer *casbin.Enforcer,
 	taskDistributor worker.TaskDistributor,
 ) {
-	server, err := api.NewServer(config, store, taskDistributor)
+	server, err := api.NewServer(config, store, enforcer, taskDistributor)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
