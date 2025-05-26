@@ -80,14 +80,21 @@ func main() {
 }
 
 func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
-	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "create")
-	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "read")
-	_, _ = casbin_enforcer.AddPolicy("banker", "accounts", "list")
-	_, _ = casbin_enforcer.AddPolicy("banker", "users", "update")
-	_, _ = casbin_enforcer.AddPolicy("banker", "transfers", "create")
-	_, _ = casbin_enforcer.AddPolicy("depositor", "accounts", "read")
-	_, _ = casbin_enforcer.AddPolicy("depositor", "users", "update")
-	_, _ = casbin_enforcer.AddPolicy("depositor", "transfers", "create")
+	add := func(sub, act string) {
+		_, _ = casbin_enforcer.AddPolicy(sub, "*", act)
+	}
+
+	// banker
+	add("banker", "accounts:create")
+	add("banker", "accounts:read")
+	add("banker", "accounts:list")
+	add("banker", "users:update")
+	add("banker", "transfers:create")
+
+	// depositer
+	add("depositor", "accounts:read")
+	add("depositor", "users:update")
+	add("depositor", "transfers:create")
 	return nil
 }
 

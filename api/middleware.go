@@ -68,15 +68,17 @@ func (s *Server) Require(action string) gin.HandlerFunc {
 		payload := p.(*token.Payload)
 
 		sub := util.Subject{Role: payload.Role, Name: payload.Username}
-		obj := util.Object{Name: "*"}
-		ok2, err := s.enforcer.Enforce(sub, obj, action)
+		obj := util.Object{Name: "*"} // wildcard for everything except ABAC handlers
+
+		allowed, err := s.enforcer.Enforce(sub, obj, action)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		if !ok2 {
+		if !allowed {
 			ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+			return
 		}
 
 		ctx.Next()
