@@ -128,8 +128,8 @@ Future Bank. Tech: Golang, Redis, K8s
 
 The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to implement a layered model that combines:
 
-|  Model   |            Used for            |                  Example                    |
-|---------:|---------------|----------------|---------------------------------------------|
-| **RBAC** | Role‑based default permissions | banker → accounts:create                    |
-| **ACL**  | One‑off user overrides         | audit-bot → accounts:read                   |
-| **ABAC** | Attribute rules                | Depositor can update their own profile only |
+|  Model    |            Used for            |                  Example                    |
+|:---------:|:------------------------------:|:-------------------------------------------:|
+|  **RBAC** | Role‑based default permissions | banker → accounts:create                    |
+|  **ACL**  | One‑off user overrides         | audit-bot → accounts:read                   |
+|  **ABAC** | Attribute rules                | Depositor can update their own profile only |
