@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "go",
+      "request": "launch",
+      "name": "Launch main.go",
+      "mode": "auto",
+      "program": "${workspaceFolder}/${input:goMainFile}",
+      "envFile": "${workspaceFolder}/.env",
+      "showLog": true,
+    }
+  ],
+  "inputs": [
+    {
+      "id": "goMainFile",
+      "type": "pickString",
+      "description": "Select the main Go file to debug",
+      "options": [
+        "main.go",
+        "api/server.go",
+        "worker/processor.go"
+      ]
+    }
+  ]
+}
