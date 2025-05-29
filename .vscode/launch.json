@@ -1,26 +1,49 @@
 {
   "version": "0.2.0",
   "configurations": [
+    /* ---------- universal picker ---------- */
     {
       "type": "go",
       "request": "launch",
-      "name": "Launch main.go",
+      "name": "Debug: choose Go entry",
       "mode": "auto",
-      "program": "${workspaceFolder}/${input:goMainFile}",
+      "program": "${workspaceFolder}/${input:entryFile}",
+      "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
-      "showLog": true,
+      "showLog": false         // flip to true only when diagnosing Delve
     }
+
+    /* ---------- optional dedicated configs ----------
+    ,{
+      "type": "go",
+      "request": "launch",
+      "name": "Debug API server (main.go)",
+      "program": "${workspaceFolder}/main.go",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "type": "go",
+      "request": "launch",
+      "name": "Debug worker (processor)",
+      "program": "${workspaceFolder}/worker/processor.go",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env"
+    }
+    -------------------------------------------------- */
   ],
+
   "inputs": [
     {
-      "id": "goMainFile",
+      "id": "entryFile",
       "type": "pickString",
       "description": "Select the main Go file to debug",
       "options": [
         "main.go",
         "api/server.go",
         "worker/processor.go"
-      ]
+      ],
+      "default": "main.go"
     }
   ]
 }
