@@ -133,3 +133,14 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
 |  **RBAC** | Role‑based default permissions | banker → accounts:create                    |
 |  **ACL**  | One‑off user overrides         | audit-bot → accounts:read                   |
 |  **ABAC** | Attribute rules                | Depositor can update their own profile only |
+
+## API Documentations
+```
+    go install github.com/swaggo/swag/cmd/swag@latest
+    echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    go get -u github.com/swaggo/gin-swagger
+    go get -u github.com/swaggo/files
+    swag init -g main.go --output docs
+    http://localhost:8080/swagger/index.html
+```

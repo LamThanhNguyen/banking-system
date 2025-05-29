@@ -11,6 +11,7 @@ import (
 
 	"github.com/LamThanhNguyen/future-bank/api"
 	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
+	_ "github.com/LamThanhNguyen/future-bank/docs" // swagger docs init
 	"github.com/LamThanhNguyen/future-bank/mail"
 	pgxadapter "github.com/LamThanhNguyen/future-bank/pgxadapter"
 	"github.com/LamThanhNguyen/future-bank/util"

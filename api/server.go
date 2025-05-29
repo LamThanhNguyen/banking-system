@@ -12,6 +12,8 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Server struct {
@@ -68,7 +70,9 @@ func (server *Server) SetupRouter() {
 		cors.New(corsCfg),
 	)
 
-	router.Static("/swagger", "./swagger")
+	if server.config.Environment != "production" {
+		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	apiRoutes := router.Group("/api/v1")
 	{
