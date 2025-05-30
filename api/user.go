@@ -201,11 +201,11 @@ type updateUserRequest struct {
 // @Param        username   path      string               true  "Username"
 // @Param        body       body      updateUserRequest    true  "Fields to update"
 // @Success      200        {object}  userResponse
-// @Failure      400        {object}  errorResponse "Invalid request or validation error"
-// @Failure      403        {object}  errorResponse "Forbidden: not allowed to update this user"
-// @Failure      404        {object}  errorResponse "User not found"
-// @Failure      409        {object}  errorResponse "Conflict: email or username already exists"
-// @Failure      500        {object}  errorResponse "Internal server error"
+// @Failure      400        {object}  api.ErrorResponse "Invalid request or validation error"
+// @Failure      403        {object}  api.ErrorResponse "Forbidden: not allowed to update this user"
+// @Failure      404        {object}  api.ErrorResponse "User not found"
+// @Failure      409        {object}  api.ErrorResponse "Conflict: email or username already exists"
+// @Failure      500        {object}  api.ErrorResponse "Internal server error"
 // @Router       /users/{username} [patch]
 func (server *Server) updateUser(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
