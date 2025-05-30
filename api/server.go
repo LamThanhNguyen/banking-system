@@ -46,6 +46,7 @@ func NewServer(
 }
 
 func (server *Server) SetupRouter() {
+	const requestTimeout = 30 * time.Second
 	if server.config.Environment == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
@@ -68,6 +69,7 @@ func (server *Server) SetupRouter() {
 		gin.Recovery(),
 		HttpLogger(),
 		cors.New(corsCfg),
+		timeoutMiddleware(requestTimeout),
 	)
 
 	if server.config.Environment != "production" {
@@ -79,7 +81,8 @@ func (server *Server) SetupRouter() {
 		apiRoutes.GET("/health", server.handleHealthCheck)
 		apiRoutes.POST("/users", server.createUser)
 		apiRoutes.POST("/users/login", server.loginUser)
-		apiRoutes.POST("/tokens/renew_access", server.renewAccessToken)
+		apiRoutes.POST("/tokens/renew-access", server.renewAccessToken)
+		apiRoutes.GET("/users/verify-email", server.verifyEmail)
 
 		authRoutes := apiRoutes.Group("", authMiddleware(server.tokenMaker))
 		authRoutes.PATCH(

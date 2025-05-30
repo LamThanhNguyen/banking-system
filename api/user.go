@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -50,19 +51,7 @@ func newUserResponse(user db.User) userResponse {
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			violations := make([]FieldViolation, 0, len(ve))
-			for _, fe := range ve {
-				violations = append(violations, FieldViolation{
-					Field:   fe.Field(),
-					Message: humanMessage(fe),
-				})
-			}
-			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
-		}
+	if !bindAndValidateJsonBody(ctx, &req) {
 		return
 	}
 
@@ -96,7 +85,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	txResult, err := server.store.CreateUserTx(ctx, arg)
 	if err != nil {
 		if db.ErrorCode(err) == db.UniqueViolation {
-			ctx.JSON(http.StatusForbidden, errorResponse(err))
+			ctx.JSON(http.StatusConflict, errorResponse(err))
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -104,7 +93,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	rsp := newUserResponse(txResult.User)
-	ctx.JSON(http.StatusOK, rsp)
+	ctx.JSON(http.StatusCreated, rsp)
 }
 
 type loginUserRequest struct {
@@ -123,19 +112,7 @@ type loginUserResponse struct {
 
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			violations := make([]FieldViolation, 0, len(ve))
-			for _, fe := range ve {
-				violations = append(violations, FieldViolation{
-					Field:   fe.Field(),
-					Message: humanMessage(fe),
-				})
-			}
-			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
-		}
+	if !bindAndValidateJsonBody(ctx, &req) {
 		return
 	}
 
@@ -218,20 +195,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationHeaderKey).(*token.Payload)
 
 	var req updateUserRequest
-
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		var ve validator.ValidationErrors
-		if errors.As(err, &ve) {
-			violations := make([]FieldViolation, 0, len(ve))
-			for _, fe := range ve {
-				violations = append(violations, FieldViolation{
-					Field:   fe.Field(),
-					Message: humanMessage(fe),
-				})
-			}
-			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
-		}
+	if !bindAndValidateJsonBody(ctx, &req) {
 		return
 	}
 
@@ -253,16 +217,22 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
+	var fullName, email pgtype.Text
+	if req.FullName != nil {
+		fullName = pgtype.Text{
+			String: *req.FullName, Valid: true,
+		}
+	}
+	if req.Email != nil {
+		email = pgtype.Text{
+			String: *req.Email, Valid: true,
+		}
+	}
+
 	arg := db.UpdateUserParams{
 		Username: req.Username,
-		FullName: pgtype.Text{
-			String: *req.FullName,
-			Valid:  req.FullName != nil,
-		},
-		Email: pgtype.Text{
-			String: *req.Email,
-			Valid:  req.Email != nil,
-		},
+		FullName: fullName,
+		Email:    email,
 	}
 
 	if req.Password != nil {
@@ -281,6 +251,8 @@ func (server *Server) updateUser(ctx *gin.Context) {
 			Time:  time.Now(),
 			Valid: true,
 		}
+	} else {
+		arg.PasswordChangedAt = pgtype.Timestamptz{}
 	}
 
 	user, err := server.store.UpdateUser(ctx, arg)
@@ -288,12 +260,75 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		if errors.Is(err, db.ErrRecordNotFound) {
 			err := fmt.Errorf("user not found")
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		if db.ErrorCode(err) == db.UniqueViolation {
+			ctx.JSON(http.StatusConflict, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 
 	rsp := newUserResponse(user)
 	ctx.JSON(http.StatusOK, rsp)
+}
+
+type verifyEmailRequest struct {
+	EmailId    int64  `form:"email_id" binding:"required,email_id"`
+	SecretCode string `form:"secret_code" binding:"required,secret_code"`
+}
+
+func (server *Server) verifyEmail(ctx *gin.Context) {
+	var req verifyEmailRequest
+
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			violations := make([]FieldViolation, 0, len(ve))
+			for _, fe := range ve {
+				violations = append(violations, FieldViolation{
+					Field:   fe.Field(),
+					Message: humanMessage(fe),
+				})
+			}
+			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	if _, err := server.store.VerifyEmailTx(ctx, db.VerifyEmailTxParams{
+		EmailId:    req.EmailId,
+		SecretCode: req.SecretCode,
+	}); err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+		default:
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
+		return
+	}
+
+	ctx.Status(http.StatusNoContent) // 204
+}
+
+func bindAndValidateJsonBody(ctx *gin.Context, v interface{}) bool {
+	if err := ctx.ShouldBindJSON(v); err != nil {
+		var ve validator.ValidationErrors
+		if errors.As(err, &ve) {
+			violations := make([]FieldViolation, len(ve))
+			for i, fe := range ve {
+				violations[i] = FieldViolation{Field: fe.Field(), Message: humanMessage(fe)}
+			}
+			ctx.JSON(http.StatusBadRequest, gin.H{"violations": violations})
+			return false
+		}
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return false
+	}
+	return true
 }
 
 func humanMessage(fe validator.FieldError) string {
@@ -310,6 +345,8 @@ func humanMessage(fe validator.FieldError) string {
 		return "must contain only letters or spaces"
 	case "email":
 		return "is not a valid email address"
+	case "email_id":
+		return "must be a positive integer"
 	default:
 		return fe.Error() // fallback
 	}

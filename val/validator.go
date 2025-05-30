@@ -60,6 +60,6 @@ func ValidateEmailId(value int64) error {
 	return nil
 }
 
-func ValidateSecretcode(value string) error {
+func ValidateSecretCode(value string) error {
 	return ValidateString(value, 32, 128)
 }

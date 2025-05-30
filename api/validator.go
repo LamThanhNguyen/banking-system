@@ -20,5 +20,11 @@ func init() {
 		v.RegisterValidation("currency", func(fl validator.FieldLevel) bool {
 			return util.IsSupportedCurrency(fl.Field().String())
 		})
+		v.RegisterValidation("email_id", func(fl validator.FieldLevel) bool {
+			return val.ValidateEmailId(fl.Field().Int()) == nil
+		})
+		v.RegisterValidation("secret_code", func(fl validator.FieldLevel) bool {
+			return val.ValidateSecretCode(fl.Field().String()) == nil
+		})
 	}
 }
