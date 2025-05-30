@@ -86,7 +86,7 @@ func (server *Server) SetupRouter() {
 
 		authRoutes := apiRoutes.Group("", authMiddleware(server.tokenMaker))
 		authRoutes.PATCH(
-			"/users/update",
+			"/users/:username",
 			server.Require("users:update"),
 			server.updateUser,
 		)

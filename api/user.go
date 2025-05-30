@@ -184,18 +184,45 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, rsp)
 }
 
+type getUserRequest struct {
+	Username string `uri:"username" binding:"required,username"`
+}
+
 type updateUserRequest struct {
-	Username string  `json:"username" binding:"required,username"`                // custom tag
 	Password *string `json:"password,omitempty" binding:"omitempty,min=8,max=50"` // built-in tags
 	FullName *string `json:"full_name,omitempty" binding:"omitempty,fullname"`    // custom tag
 	Email    *string `json:"email,omitempty" binding:"omitempty,email,max=50"`    // built-in
 }
 
+// @Summary      Update user
+// @Description  Banker can update any user. Depositor can update only their own account.
+// @Tags         users
+// @Security     BearerAuth
+// @Param        username   path      string               true  "Username"
+// @Param        body       body      updateUserRequest    true  "Fields to update"
+// @Success      200        {object}  userResponse
+// @Failure      400        {object}  errorResponse "Invalid request or validation error"
+// @Failure      403        {object}  errorResponse "Forbidden: not allowed to update this user"
+// @Failure      404        {object}  errorResponse "User not found"
+// @Failure      409        {object}  errorResponse "Conflict: email or username already exists"
+// @Failure      500        {object}  errorResponse "Internal server error"
+// @Router       /users/{username} [patch]
 func (server *Server) updateUser(ctx *gin.Context) {
-	authPayload := ctx.MustGet(authorizationHeaderKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req updateUserRequest
-	if !bindAndValidateJsonBody(ctx, &req) {
+	var reqPath getUserRequest
+	if err := ctx.ShouldBindUri(&reqPath); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var reqBody updateUserRequest
+	if !bindAndValidateJsonBody(ctx, &reqBody) {
+		return
+	}
+
+	if reqBody.Password == nil && reqBody.FullName == nil && reqBody.Email == nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(fmt.Errorf("no fields to update")))
 		return
 	}
 
@@ -204,7 +231,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		Name: authPayload.Username,
 	}
 	obj := util.Object{
-		Name: req.Username,
+		Name: reqPath.Username,
 	}
 
 	ok, err := server.enforcer.Enforce(sub, obj, "users:update")
@@ -218,25 +245,25 @@ func (server *Server) updateUser(ctx *gin.Context) {
 	}
 
 	var fullName, email pgtype.Text
-	if req.FullName != nil {
+	if reqBody.FullName != nil {
 		fullName = pgtype.Text{
-			String: *req.FullName, Valid: true,
+			String: *reqBody.FullName, Valid: true,
 		}
 	}
-	if req.Email != nil {
+	if reqBody.Email != nil {
 		email = pgtype.Text{
-			String: *req.Email, Valid: true,
+			String: *reqBody.Email, Valid: true,
 		}
 	}
 
 	arg := db.UpdateUserParams{
-		Username: req.Username,
+		Username: reqPath.Username,
 		FullName: fullName,
 		Email:    email,
 	}
 
-	if req.Password != nil {
-		hashedPassword, err := util.HashPassword(*req.Password)
+	if reqBody.Password != nil {
+		hashedPassword, err := util.HashPassword(*reqBody.Password)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 			return
@@ -257,16 +284,16 @@ func (server *Server) updateUser(ctx *gin.Context) {
 
 	user, err := server.store.UpdateUser(ctx, arg)
 	if err != nil {
-		if errors.Is(err, db.ErrRecordNotFound) {
+		switch {
+		case errors.Is(err, db.ErrRecordNotFound):
 			err := fmt.Errorf("user not found")
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return
-		}
-		if db.ErrorCode(err) == db.UniqueViolation {
+		case db.ErrorCode(err) == db.UniqueViolation:
 			ctx.JSON(http.StatusConflict, errorResponse(err))
-			return
+		default:
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
 
 	rsp := newUserResponse(user)

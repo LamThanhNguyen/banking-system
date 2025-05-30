@@ -20,7 +20,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationHeaderKey).(*token.Payload)
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Currency: req.Currency,
