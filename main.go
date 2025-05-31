@@ -29,6 +29,13 @@ var interruptSignals = []os.Signal{
 	syscall.SIGINT,
 }
 
+// @title           Future Bank API
+// @version         1.0
+// @description     API documentation for the Future Bank project.
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token. Example: "Bearer <token>"
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
@@ -95,6 +102,7 @@ func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
 	// depositer
 	add("depositor", "accounts:create")
 	add("depositor", "accounts:read")
+	add("depositor", "accounts:list")
 	add("depositor", "users:update")
 	add("depositor", "transfers:create")
 	return nil

@@ -3,6 +3,94 @@ definitions:
     properties:
       error:
         type: string
+      violations:
+        items:
+          $ref: '#/definitions/api.FieldViolation'
+        type: array
+    type: object
+  api.FieldViolation:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  api.createAccountRequest:
+    properties:
+      currency:
+        type: string
+    required:
+    - currency
+    type: object
+  api.createUserRequest:
+    properties:
+      email:
+        description: built-in
+        maxLength: 50
+        type: string
+      full_name:
+        description: custom tag
+        type: string
+      password:
+        description: built-in tags
+        maxLength: 50
+        minLength: 8
+        type: string
+      username:
+        description: custom tag
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    - username
+    type: object
+  api.loginUserRequest:
+    properties:
+      password:
+        description: built-in tags
+        maxLength: 50
+        minLength: 8
+        type: string
+      username:
+        description: custom tag
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  api.loginUserResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_at:
+        type: string
+      refresh_token:
+        type: string
+      refresh_token_expires_at:
+        type: string
+      session_id:
+        type: string
+      user:
+        $ref: '#/definitions/api.userResponse'
+    type: object
+  api.transferRequest:
+    properties:
+      amount:
+        type: integer
+      currency:
+        type: string
+      from_account_id:
+        minimum: 1
+        type: integer
+      to_account_id:
+        minimum: 1
+        type: integer
+    required:
+    - amount
+    - currency
+    - from_account_id
+    - to_account_id
     type: object
   api.updateUserRequest:
     properties:
@@ -32,10 +120,249 @@ definitions:
       username:
         type: string
     type: object
+  db.Account:
+    properties:
+      balance:
+        type: integer
+      created_at:
+        type: string
+      currency:
+        type: string
+      id:
+        type: integer
+      owner:
+        type: string
+    type: object
+  db.Entry:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        description: can be negative or positive
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+    type: object
+  db.Transfer:
+    properties:
+      amount:
+        description: must be positive
+        type: integer
+      created_at:
+        type: string
+      from_account_id:
+        type: integer
+      id:
+        type: integer
+      to_account_id:
+        type: integer
+    type: object
+  db.TransferTxResult:
+    properties:
+      from_account:
+        $ref: '#/definitions/db.Account'
+      from_entry:
+        $ref: '#/definitions/db.Entry'
+      to_account:
+        $ref: '#/definitions/db.Account'
+      to_entry:
+        $ref: '#/definitions/db.Entry'
+      transfer:
+        $ref: '#/definitions/db.Transfer'
+    type: object
 info:
   contact: {}
+  description: API documentation for the Future Bank project.
+  title: Future Bank API
+  version: "1.0"
 paths:
-  /users/{username}:
+  /api/v1/accounts:
+    get:
+      description: List all accounts for the authenticated user (paginated)
+      parameters:
+      - description: Page number (min 1)
+        in: query
+        name: page_id
+        required: true
+        type: integer
+      - description: Page size (min 5, max 10)
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/db.Account'
+            type: array
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List accounts
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      description: Create a new bank account for the authenticated user
+      parameters:
+      - description: Account info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.createAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Account'
+        "400":
+          description: Invalid request or validation error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "403":
+          description: 'Forbidden: account already exists or invalid foreign key'
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create account
+      tags:
+      - accounts
+  /api/v1/accounts/{id}:
+    get:
+      description: Get an account by its ID. Only the owner can access their account.
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.Account'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: 'Unauthorized: not account owner'
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get account
+      tags:
+      - accounts
+  /api/v1/transfers:
+    post:
+      consumes:
+      - application/json
+      description: Transfer funds from one account to another. Only the owner of the
+        source account can initiate a transfer.
+      parameters:
+      - description: Transfer details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.transferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.TransferTxResult'
+        "400":
+          description: Invalid request or currency mismatch
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: 'Unauthorized: from account doesn''t belong to the user'
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Transfer funds
+      tags:
+      - transfers
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user and send email verification. Username and email
+        must be unique.
+      parameters:
+      - description: User registration info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.createUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.userResponse'
+        "400":
+          description: Invalid request or validation error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "409":
+          description: 'Conflict: email or username already exists'
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /api/v1/users/{username}:
     patch:
       description: Banker can update any user. Depositor can update only their own
         account.
@@ -81,4 +408,85 @@ paths:
       summary: Update user
       tags:
       - users
+  /api/v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and create a session with access & refresh tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.loginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.loginUserResponse'
+        "400":
+          description: Invalid request or validation error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: 'Unauthorized: incorrect credentials'
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Login
+      tags:
+      - users
+  /api/v1/users/verify_email:
+    get:
+      consumes:
+      - application/json
+      description: Verify user email using a secret code sent via email
+      parameters:
+      - description: Email ID
+        in: query
+        name: email_id
+        required: true
+        type: integer
+      - description: Secret verification code
+        in: query
+        name: secret_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: 'No Content: email verified successfully'
+        "400":
+          description: Invalid request or validation error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Email or code not found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Verify email
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: 'Type "Bearer" followed by a space and JWT token. Example: "Bearer
+      <token>"'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

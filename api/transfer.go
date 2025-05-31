@@ -17,6 +17,19 @@ type transferRequest struct {
 	Currency      string `json:"currency" binding:"required,currency"`
 }
 
+// @Summary      Transfer funds
+// @Description  Transfer funds from one account to another. Only the owner of the source account can initiate a transfer.
+// @Tags         transfers
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      transferRequest  true  "Transfer details"
+// @Success      200   {object}  db.TransferTxResult
+// @Failure      400   {object}  api.ErrorResponse "Invalid request or currency mismatch"
+// @Failure      401   {object}  api.ErrorResponse "Unauthorized: from account doesn't belong to the user"
+// @Failure      404   {object}  api.ErrorResponse "Account not found"
+// @Failure      500   {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/transfers [post]
 func (server *Server) createTransfer(ctx *gin.Context) {
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

@@ -13,6 +13,18 @@ type createAccountRequest struct {
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
+// @Summary      Create account
+// @Description  Create a new bank account for the authenticated user
+// @Tags         accounts
+// @Security     BearerAuth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      createAccountRequest  true  "Account info"
+// @Success      200   {object}  db.Account
+// @Failure      400   {object}  api.ErrorResponse "Invalid request or validation error"
+// @Failure      403   {object}  api.ErrorResponse "Forbidden: account already exists or invalid foreign key"
+// @Failure      500   {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/accounts [post]
 func (server *Server) createAccount(ctx *gin.Context) {
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -45,6 +57,18 @@ type getAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
+// @Summary      Get account
+// @Description  Get an account by its ID. Only the owner can access their account.
+// @Tags         accounts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        id   path      int  true  "Account ID"
+// @Success      200  {object}  db.Account
+// @Failure      400  {object}  api.ErrorResponse "Invalid request"
+// @Failure      401  {object}  api.ErrorResponse "Unauthorized: not account owner"
+// @Failure      404  {object}  api.ErrorResponse "Account not found"
+// @Failure      500  {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/accounts/{id} [get]
 func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -77,6 +101,17 @@ type listAccountRequest struct {
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
+// @Summary      List accounts
+// @Description  List all accounts for the authenticated user (paginated)
+// @Tags         accounts
+// @Security     BearerAuth
+// @Produce      json
+// @Param        page_id   query     int  true  "Page number (min 1)"
+// @Param        page_size query     int  true  "Page size (min 5, max 10)"
+// @Success      200       {array}   db.Account
+// @Failure      400       {object}  api.ErrorResponse "Invalid request"
+// @Failure      500       {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/accounts [get]
 func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {

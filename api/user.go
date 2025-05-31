@@ -48,6 +48,17 @@ func newUserResponse(user db.User) userResponse {
 	}
 }
 
+// @Summary      Create a new user
+// @Description  Register a new user and send email verification. Username and email must be unique.
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        body  body      createUserRequest  true  "User registration info"
+// @Success      201   {object}  userResponse
+// @Failure      400   {object}  api.ErrorResponse "Invalid request or validation error"
+// @Failure      409   {object}  api.ErrorResponse "Conflict: email or username already exists"
+// @Failure      500   {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/users [post]
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 
@@ -110,6 +121,18 @@ type loginUserResponse struct {
 	User                  userResponse `json:"user"`
 }
 
+// @Summary      Login
+// @Description  Authenticate user and create a session with access & refresh tokens
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        body  body      loginUserRequest  true  "Login credentials"
+// @Success      200   {object}  loginUserResponse
+// @Failure      400   {object}  api.ErrorResponse "Invalid request or validation error"
+// @Failure      401   {object}  api.ErrorResponse "Unauthorized: incorrect credentials"
+// @Failure      404   {object}  api.ErrorResponse "User not found"
+// @Failure      500   {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/users/login [post]
 func (server *Server) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if !bindAndValidateJsonBody(ctx, &req) {
@@ -206,7 +229,7 @@ type updateUserRequest struct {
 // @Failure      404        {object}  api.ErrorResponse "User not found"
 // @Failure      409        {object}  api.ErrorResponse "Conflict: email or username already exists"
 // @Failure      500        {object}  api.ErrorResponse "Internal server error"
-// @Router       /users/{username} [patch]
+// @Router       /api/v1/users/{username} [patch]
 func (server *Server) updateUser(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
@@ -305,6 +328,18 @@ type verifyEmailRequest struct {
 	SecretCode string `form:"secret_code" binding:"required,secret_code"`
 }
 
+// @Summary      Verify email
+// @Description  Verify user email using a secret code sent via email
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        email_id    query     int    true   "Email ID"
+// @Param        secret_code query     string true   "Secret verification code"
+// @Success      204        "No Content: email verified successfully"
+// @Failure      400        {object}  api.ErrorResponse "Invalid request or validation error"
+// @Failure      404        {object}  api.ErrorResponse "Email or code not found"
+// @Failure      500        {object}  api.ErrorResponse "Internal server error"
+// @Router       /api/v1/users/verify_email [get]
 func (server *Server) verifyEmail(ctx *gin.Context) {
 	var req verifyEmailRequest
 

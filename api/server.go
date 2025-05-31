@@ -129,7 +129,8 @@ func (server *Server) handleHealthCheck(c *gin.Context) {
 
 // ErrorResponse defines the standard error response for the API.
 type ErrorResponse struct {
-	Message string `json:"error"`
+	Error      string           `json:"error"`
+	Violations []FieldViolation `json:"violations,omitempty"`
 }
 
 func errorResponse(err error) gin.H {
