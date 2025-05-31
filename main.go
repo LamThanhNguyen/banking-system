@@ -93,6 +93,7 @@ func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
 	add("banker", "transfers:create")
 
 	// depositer
+	add("depositor", "accounts:create")
 	add("depositor", "accounts:read")
 	add("depositor", "users:update")
 	add("depositor", "transfers:create")
