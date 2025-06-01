@@ -124,6 +124,26 @@ Future Bank. Tech: Golang, Redis, K8s
     go mod tidy
     ```
 
+- Generate DB mock with gomock:
+
+  ```bash
+  make mock
+  ```
+
+### How to run
+
+- Run server:
+
+  ```bash
+  make server
+  ```
+
+- Run test:
+
+  ```bash
+  make test
+  ```
+
 ## Authorization & Access Control
 
 The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to implement a layered model that combines:

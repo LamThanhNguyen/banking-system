@@ -44,8 +44,8 @@ server:
 	go run main.go
 
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/techschool/futurebank/db/sqlc Store
-	mockgen -package mockwk -destination worker/mock/distributor.go github.com/techschool/futurebank/worker TaskDistributor
+	mockgen -package mockdb -destination db/mock/store.go github.com/LamThanhNguyen/future-bank/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributor.go github.com/LamThanhNguyen/future-bank/worker TaskDistributor
 
 redis:
 	docker run --name redis -p 6379:6379 -d redis:7-alpine
