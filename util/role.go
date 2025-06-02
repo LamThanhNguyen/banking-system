@@ -8,3 +8,8 @@ type Subject struct {
 type Object struct {
 	Name string // username of resource onwer
 }
+
+const (
+	DepositorRole = "depositor"
+	BankerRole    = "banker"
+)

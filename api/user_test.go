@@ -18,7 +18,7 @@ func randomDistributorUser(t *testing.T) (user db.User, password string) {
 		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
-		Role:           "distributor",
+		Role:           util.DepositorRole,
 	}
 	return
 }
@@ -33,7 +33,7 @@ func randomBankerUser(t *testing.T) (user db.User, password string) {
 		HashedPassword: hashedPassword,
 		FullName:       util.RandomOwner(),
 		Email:          util.RandomEmail(),
-		Role:           "banker",
+		Role:           util.BankerRole,
 	}
 	return
 }

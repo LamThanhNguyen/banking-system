@@ -42,7 +42,7 @@ func newTestServer(
 	taskDistributor worker.TaskDistributor,
 ) *Server {
 	if enforcer == nil {
-		enforcer = newTestEnforcer(t) // 👈 ensures non-nil
+		enforcer = newTestEnforcer(t)
 	}
 
 	config := util.Config{
