@@ -164,3 +164,20 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
     swag init -g main.go --output docs
     http://localhost:8080/swagger/index.html
 ```
+
+## Docker Container
+```
+    docker build -t futurebank:latest .
+    docker run --name futurebank --network bank-network -p 8080:8080 futurebank:lastest
+    docker run --name futurebank --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE futurebank:latest
+    docker compose up
+    docker compose down
+    docker ps
+    docker rm {container-name}
+    docker rmi {iamge-id}
+    docker container inspect {container-name}
+    docker network create {network-name}
+    docker network connect {network-name} {container-name}
+    docker network ls
+    docker network inspect {network-name}
+```

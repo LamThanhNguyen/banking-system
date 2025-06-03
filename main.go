@@ -17,6 +17,7 @@ import (
 	"github.com/LamThanhNguyen/future-bank/util"
 	"github.com/LamThanhNguyen/future-bank/worker"
 	"github.com/casbin/casbin/v2"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
@@ -52,6 +53,9 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 
+	// Run migration to database
+	runDBMigration(config.MigrationURL, config.DBSource)
+
 	casbin_adapter, err := pgxadapter.New(ctx, connPool)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create casbin adapter")
@@ -85,6 +89,19 @@ func main() {
 	}
 
 	log.Info().Msg("application shutdown complete")
+}
+
+func runDBMigration(migrationURL string, dbSource string) {
+	migration, err := migrate.New(migrationURL, dbSource)
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create new migrate instance")
+	}
+
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal().Err(err).Msg("failed to run migrate up")
+	}
+
+	log.Info().Msg("db migrated successfully")
 }
 
 func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
