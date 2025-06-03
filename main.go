@@ -18,6 +18,8 @@ import (
 	"github.com/LamThanhNguyen/future-bank/worker"
 	"github.com/casbin/casbin/v2"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"

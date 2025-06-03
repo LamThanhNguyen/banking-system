@@ -6,9 +6,6 @@ network:
 postgres:
 	docker run --name postgres --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
 
-mysql:
-	docker run --name mysql8 -p 3306:3306  -e MYSQL_ROOT_PASSWORD=secret -d mysql:8
-
 createdb:
 	docker exec -it postgres createdb --username=root --owner=root future_bank
 
@@ -48,6 +45,15 @@ mock:
 	mockgen -package mockwk -destination worker/mock/distributor.go github.com/LamThanhNguyen/future-bank/worker TaskDistributor
 
 redis:
-	docker run --name redis -p 6379:6379 -d redis:7-alpine
+	docker run --name redis --network bank-network -p 6379:6379 -d redis:7-alpine
+
+build-container:
+	docker build -t futurebank:latest .
+
+run-container:
+	docker run --name futurebank --network bank-network -p 8080:8080 futurebank:latest
+
+run-compose:
+	docker compose up
 
 .PHONY: network postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 new_migration db_docs db_schema sqlc test server mock redis

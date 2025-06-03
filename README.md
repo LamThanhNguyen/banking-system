@@ -167,9 +167,11 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
 
 ## Docker Container
 ```
+    chmod +x start.sh
     docker build -t futurebank:latest .
-    docker run --name futurebank --network bank-network -p 8080:8080 futurebank:lastest
+    docker run --name futurebank --network bank-network -p 8080:8080 futurebank:latest
     docker run --name futurebank --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE futurebank:latest
+    docker compose build
     docker compose up
     docker compose down
     docker ps
@@ -180,4 +182,7 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
     docker network connect {network-name} {container-name}
     docker network ls
     docker network inspect {network-name}
+    docker stop $(docker ps -a -q)
+    docker rm -f $(docker ps -a -q)
+    docker rmi -f $(docker images -aq)
 ```
