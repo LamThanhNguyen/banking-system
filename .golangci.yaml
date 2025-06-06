@@ -1,0 +1,9 @@
+version: "2"
+run:
+  timeout: 5m    # Increases the timeout for all runs (default is 1m)
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
