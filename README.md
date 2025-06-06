@@ -82,11 +82,12 @@ Future Bank. Tech: Golang, Redis, K8s
     ENVIRONMENT=development
     ALLOWED_ORIGINS=
     DB_SOURCE=
+    MIGRATION_URL=
+    REDIS_ADDRESS=
     HTTP_SERVER_ADDRESS=
     TOKEN_SYMMETRIC_KEY=
     ACCESS_TOKEN_DURATION=15m
     REFRESH_TOKEN_DURATION=24h
-    REDIS_ADDRESS=
     EMAIL_SENDER_NAME=
     EMAIL_SENDER_ADDRESS=
     EMAIL_SENDER_PASSWORD=
@@ -185,4 +186,13 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
     docker stop $(docker ps -a -q)
     docker rm -f $(docker ps -a -q)
     docker rmi -f $(docker images -aq)
+```
+
+## Linter: golangci-lint
+```
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.1.6
+    echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
+    source ~/.bashrc
+    golangci-lint --version
+    golangci-lint run
 ```

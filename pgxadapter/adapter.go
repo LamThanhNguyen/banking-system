@@ -156,7 +156,9 @@ func (a *Adapter) LoadPolicyBatch(m model.Model) error {
 			&rec[4], &rec[5], &rec[6]); err != nil {
 			return err
 		}
-		persist.LoadPolicyLine(strings.Join(rec[:], ", "), m)
+		if err := persist.LoadPolicyLine(strings.Join(rec[:], ", "), m); err != nil {
+			return err
+		}
 	}
 	return rows.Err()
 }
