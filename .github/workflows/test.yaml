@@ -79,7 +79,7 @@ jobs:
         run: make migrateup
       
       - name: Test
-        run: make test
+        run: make test | tee test-report.txt
         env:
           DB_SOURCE: "postgresql://root:secret@localhost:5432/future_bank?sslmode=disable"
       
