@@ -1,5 +1,5 @@
 # future-bank
-Future Bank. Tech: Golang, Redis, K8s
+Future Bank. Tech: Golang, Redis, K8s, Github Actions
 
 ## Setup local development
 
