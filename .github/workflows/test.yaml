@@ -22,6 +22,8 @@ jobs:
 
       - name: Clean go build cache
         run: |
+          chmod -R +w ~/.cache/go-build || true
+          chmod -R +w ~/go/pkg/mod || true
           rm -rf ~/.cache/go-build
           rm -rf ~/go/pkg/mod
 
@@ -75,6 +77,8 @@ jobs:
 
       - name: Clean go build cache
         run: |
+          chmod -R +w ~/.cache/go-build || true
+          chmod -R +w ~/go/pkg/mod || true
           rm -rf ~/.cache/go-build
           rm -rf ~/go/pkg/mod
 
