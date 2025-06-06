@@ -14,9 +14,26 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Setup Go 1.24.x
+        uses: actions/setup-go@v5
         with:
-          go-version: "1.24.x"
+          go-version: '1.24.x'
+        id: go
+
+      - name: Clean go build cache
+        run: |
+          rm -rf ~/.cache/go-build
+          rm -rf ~/go/pkg/mod
+
+      - name: Cache go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Download Go modules
         run: go mod download
@@ -55,6 +72,11 @@ jobs:
         with:
           go-version: '1.24.x'
         id: go
+
+      - name: Clean go build cache
+        run: |
+          rm -rf ~/.cache/go-build
+          rm -rf ~/go/pkg/mod
 
       - name: Cache go modules
         uses: actions/cache@v4
