@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	"github.com/LamThanhNguyen/future-bank/util"
-	"github.com/LamThanhNguyen/future-bank/worker"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	"github.com/LamThanhNguyen/banking-system/util"
+	"github.com/LamThanhNguyen/banking-system/worker"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/gin-gonic/gin"

@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API documentation for the Future Bank project.",
-        "title": "Future Bank API",
+        "description": "API documentation for the Be Banking System project.",
+        "title": "Be Banking System API",
         "contact": {},
         "version": "1.0"
     },

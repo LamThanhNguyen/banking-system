@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LamThanhNguyen/future-bank/token"
-	"github.com/LamThanhNguyen/future-bank/util"
+	"github.com/LamThanhNguyen/banking-system/token"
+	"github.com/LamThanhNguyen/banking-system/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )

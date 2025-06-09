@@ -1,5 +1,5 @@
-# future-bank
-Future Bank. Tech: Golang, Redis, K8s, Github Actions
+# banking-system
+Be Banking System. Tech: Golang, Redis, K8s, Github Actions
 
 ## Setup local development
 
@@ -110,7 +110,7 @@ Future Bank. Tech: Golang, Redis, K8s, Github Actions
 - Init Go module
 
     ```bash
-    go mod init github.com/LamThanhNguyen/future-bank
+    go mod init github.com/LamThanhNguyen/banking-system
     ```
 
 - Install package
@@ -169,9 +169,9 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
 ## Docker Container
 ```
     chmod +x start.sh
-    docker build -t futurebank:latest .
-    docker run --name futurebank --network bank-network -p 8080:8080 futurebank:latest
-    docker run --name futurebank --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE futurebank:latest
+    docker build -t banking-system:latest .
+    docker run --name banking-system --network bank-network -p 8080:8080 banking-system:latest
+    docker run --name banking-system --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE banking-system:latest
     docker compose build
     docker compose up
     docker compose down

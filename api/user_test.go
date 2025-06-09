@@ -11,9 +11,9 @@ import (
 	"reflect"
 	"testing"
 
-	mockdb "github.com/LamThanhNguyen/future-bank/db/mock"
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	"github.com/LamThanhNguyen/future-bank/util"
+	mockdb "github.com/LamThanhNguyen/banking-system/db/mock"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	"github.com/LamThanhNguyen/banking-system/util"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"

@@ -9,13 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LamThanhNguyen/future-bank/api"
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	_ "github.com/LamThanhNguyen/future-bank/docs" // swagger docs init
-	"github.com/LamThanhNguyen/future-bank/mail"
-	pgxadapter "github.com/LamThanhNguyen/future-bank/pgxadapter"
-	"github.com/LamThanhNguyen/future-bank/util"
-	"github.com/LamThanhNguyen/future-bank/worker"
+	"github.com/LamThanhNguyen/banking-system/api"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	_ "github.com/LamThanhNguyen/banking-system/docs" // swagger docs init
+	"github.com/LamThanhNguyen/banking-system/mail"
+	pgxadapter "github.com/LamThanhNguyen/banking-system/pgxadapter"
+	"github.com/LamThanhNguyen/banking-system/util"
+	"github.com/LamThanhNguyen/banking-system/worker"
 	"github.com/casbin/casbin/v2"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -32,9 +32,9 @@ var interruptSignals = []os.Signal{
 	syscall.SIGINT,
 }
 
-// @title           Future Bank API
+// @title           Be Banking System API
 // @version         1.0
-// @description     API documentation for the Future Bank project.
+// @description     API documentation for the Be Banking System project.
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization

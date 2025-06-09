@@ -1,4 +1,4 @@
-module github.com/LamThanhNguyen/future-bank
+module github.com/LamThanhNguyen/banking-system
 
 go 1.24.2
 

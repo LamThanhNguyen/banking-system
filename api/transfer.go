@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	"github.com/LamThanhNguyen/future-bank/token"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	"github.com/LamThanhNguyen/banking-system/token"
 	"github.com/gin-gonic/gin"
 )
 

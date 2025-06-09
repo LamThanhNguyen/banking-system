@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/url"
 
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	"github.com/LamThanhNguyen/future-bank/util"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	"github.com/LamThanhNguyen/banking-system/util"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 )

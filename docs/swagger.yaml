@@ -174,8 +174,8 @@ definitions:
     type: object
 info:
   contact: {}
-  description: API documentation for the Future Bank project.
-  title: Future Bank API
+  description: API documentation for the Be Banking System project.
+  title: Be Banking System API
   version: "1.0"
 paths:
   /api/v1/accounts:

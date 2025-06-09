@@ -8,6 +8,3 @@ CREATE TABLE IF NOT EXISTS casbin_rule (
     v4     TEXT,
     v5     TEXT
 );
-
--- Indexes speed up Enforce()
-CREATE INDEX IF NOT EXISTS idx_casbin_rule ON casbin_rule (ptype, v0, v1, v2);

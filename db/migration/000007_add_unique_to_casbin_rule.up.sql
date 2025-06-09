@@ -1,3 +1,1 @@
-ALTER TABLE casbin_rule
-ADD CONSTRAINT uq_casbin_rule UNIQUE
-(ptype, v0, v1, v2, v3, v4, v5);
+ALTER TABLE casbin_rule ADD CONSTRAINT uq_casbin_rule UNIQUE (ptype, v0, v1);

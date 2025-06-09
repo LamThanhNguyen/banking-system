@@ -2,6 +2,7 @@ package pgxadapter
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -61,21 +62,22 @@ func (a *Adapter) SavePolicy(_ model.Model) error {
 func (a *Adapter) AddPolicy(_ string, ptype string, rule []string) error {
 	ctx := context.Background()
 
-	// pad rule to 6 fields
-	for len(rule) < 6 {
-		rule = append(rule, "")
-	}
-
 	args := []interface{}{ptype}
-	for _, v := range rule[:6] {
+	for _, v := range rule {
 		args = append(args, v)
 	}
 
-	_, err := a.pool.Exec(ctx, `
-		INSERT INTO casbin_rule (ptype,v0,v1,v2,v3,v4,v5)
-		VALUES ($1,$2,$3,$4,$5,$6,$7)
-		ON CONFLICT DO NOTHING
-	`, args...)
+	placeholders := []string{"$1"}
+	for i := 2; i <= len(args); i++ {
+		placeholders = append(placeholders, fmt.Sprintf("$%d", i))
+	}
+
+	cols := []string{"ptype", "v0", "v1", "v2", "v3", "v4", "v5"}[:len(args)]
+	_, err := a.pool.Exec(ctx,
+		fmt.Sprintf(`INSERT INTO casbin_rule (%s) VALUES (%s) ON CONFLICT DO NOTHING`,
+			strings.Join(cols, ","),
+			strings.Join(placeholders, ",")),
+		args...)
 	return err
 }
 
@@ -143,20 +145,43 @@ func (a *Adapter) RemovePolicies(sec, ptype string, rules [][]string) error {
 }
 
 func (a *Adapter) LoadPolicyBatch(m model.Model) error {
-	rows, err := a.pool.Query(context.Background(),
-		`SELECT ptype,v0,v1,v2,v3,v4,v5 FROM casbin_rule`)
+	rows, err := a.pool.Query(context.Background(), `
+        SELECT
+            ptype,
+            COALESCE(v0, '') AS v0,
+            COALESCE(v1, '') AS v1,
+            COALESCE(v2, '') AS v2,
+            COALESCE(v3, '') AS v3,
+            COALESCE(v4, '') AS v4,
+            COALESCE(v5, '') AS v5
+        FROM casbin_rule`)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
-	var rec [7]string
+	var rec [7]sql.NullString
 	for rows.Next() {
-		if err := rows.Scan(&rec[0], &rec[1], &rec[2], &rec[3],
-			&rec[4], &rec[5], &rec[6]); err != nil {
+		if err := rows.Scan(
+			&rec[0],
+			&rec[1],
+			&rec[2],
+			&rec[3],
+			&rec[4],
+			&rec[5],
+			&rec[6]); err != nil {
 			return err
 		}
-		if err := persist.LoadPolicyLine(strings.Join(rec[:], ", "), m); err != nil {
+		parts := make([]string, 0, 7)
+		for _, n := range rec {
+			if n.Valid && n.String != "" {
+				parts = append(parts, n.String)
+			} else {
+				break // stop at first empty
+			}
+		}
+		line := strings.Join(parts, ", ")
+		if err := persist.LoadPolicyLine(line, m); err != nil {
 			return err
 		}
 	}

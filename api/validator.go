@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/LamThanhNguyen/future-bank/util"
-	"github.com/LamThanhNguyen/future-bank/val"
+	"github.com/LamThanhNguyen/banking-system/util"
+	"github.com/LamThanhNguyen/banking-system/val"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )

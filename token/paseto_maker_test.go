@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/LamThanhNguyen/future-bank/util"
+	"github.com/LamThanhNguyen/banking-system/util"
 	"github.com/stretchr/testify/require"
 )
 

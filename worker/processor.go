@@ -3,8 +3,8 @@ package worker
 import (
 	"context"
 
-	db "github.com/LamThanhNguyen/future-bank/db/sqlc"
-	"github.com/LamThanhNguyen/future-bank/mail"
+	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
+	"github.com/LamThanhNguyen/banking-system/mail"
 	"github.com/hibiken/asynq"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
