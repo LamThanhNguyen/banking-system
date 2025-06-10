@@ -196,3 +196,9 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
     golangci-lint --version
     golangci-lint run
 ```
+
+## AWS Secrets Manager
+```
+openssl rand -hex 64
+openssl rand -hex 64 | head -c 32
+```
