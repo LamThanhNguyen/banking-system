@@ -11,7 +11,7 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Go 1.24.x
