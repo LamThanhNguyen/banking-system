@@ -202,3 +202,5 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
 openssl rand -hex 64
 openssl rand -hex 64 | head -c 32
 ```
+```
+```
