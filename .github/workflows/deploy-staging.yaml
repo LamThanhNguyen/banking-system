@@ -4,6 +4,10 @@ on:
   push:
     branches: [staging]
 
+permissions:
+  id-token: write     # <--- REQUIRED for OIDC to work
+  contents: read
+
 jobs:
   deploy:
     name: Build image
