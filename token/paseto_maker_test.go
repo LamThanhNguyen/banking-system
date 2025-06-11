@@ -8,6 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNewPasetoMakerInvalidKeySize(t *testing.T) {
+	maker, err := NewPasetoMaker(util.RandomString(31))
+	require.Error(t, err)
+	require.Nil(t, maker)
+}
+
 func TestPasetoMaker(t *testing.T) {
 	maker, err := NewPasetoMaker(util.RandomString(32))
 	require.NoError(t, err)
