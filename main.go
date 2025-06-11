@@ -40,15 +40,15 @@ var interruptSignals = []os.Signal{
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token. Example: "Bearer <token>"
 func main() {
-	config, err := util.LoadConfig(".")
+	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals...)
+	defer stop()
+
+	config, err := util.LoadConfig(ctx, ".")
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
 	log.Info().Interface("config", config).Msg("loaded config")
-
-	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals...)
-	defer stop()
 
 	connPool, err := pgxpool.New(ctx, config.DBSource)
 	if err != nil {

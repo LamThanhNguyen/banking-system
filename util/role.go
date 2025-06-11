@@ -6,7 +6,7 @@ type Subject struct {
 }
 
 type Object struct {
-	Name string // username of resource onwer
+	Name string // username of resource owner
 }
 
 const (
