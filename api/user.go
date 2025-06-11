@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -339,7 +338,7 @@ type verifyEmailRequest struct {
 // @Failure      400        {object}  api.ErrorResponse "Invalid request or validation error"
 // @Failure      404        {object}  api.ErrorResponse "Email or code not found"
 // @Failure      500        {object}  api.ErrorResponse "Internal server error"
-// @Router       /api/v1/users/verify_email [get]
+// @Router       /api/v1/users/verify-email [get]
 func (server *Server) verifyEmail(ctx *gin.Context) {
 	var req verifyEmailRequest
 
@@ -365,7 +364,7 @@ func (server *Server) verifyEmail(ctx *gin.Context) {
 		SecretCode: req.SecretCode,
 	}); err != nil {
 		switch {
-		case errors.Is(err, sql.ErrNoRows):
+		case errors.Is(err, db.ErrRecordNotFound):
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 		default:
 			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
