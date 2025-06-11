@@ -9,6 +9,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNewJWTMakerInvalidKeySize(t *testing.T) {
+	maker, err := NewJWTMaker(util.RandomString(31))
+	require.Error(t, err)
+	require.Nil(t, maker)
+}
+
 func TestJWTMaker(t *testing.T) {
 	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
