@@ -36,6 +36,5 @@ jobs:
           docker build \
             -f Dockerfile.deploy \
             --build-arg ENVIRONMENT=staging \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
-          docker push -a $ECR_REGISTRY/$ECR_REPOSITORY
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
