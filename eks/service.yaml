@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: banking-system-api-service
+  annotations:
+    #Important Note:  Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
+    alb.ingress.kubernetes.io/healthcheck-path: /api/v1/health
+spec:
+  type: ClusterIP
+  selector:
+    app: banking-system-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http-server
+    name: http-service

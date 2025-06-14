@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-system-api-deployment
+  labels:
+    app: banking-system-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: banking-system-api
+  template:
+    metadata:
+      labels:
+        app: banking-system-api
+    spec:
+      containers:
+      - name: banking-system-api
+        image: 654654441358.dkr.ecr.ap-southeast-1.amazonaws.com/banking-system:81eb2f923cbe8d8ab13bf812a4d9e1994bc59fec
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+          name: http-server
