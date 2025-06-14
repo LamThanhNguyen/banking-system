@@ -5,6 +5,7 @@ import (
 
 	db "github.com/LamThanhNguyen/banking-system/db/sqlc"
 	"github.com/LamThanhNguyen/banking-system/mail"
+	"github.com/LamThanhNguyen/banking-system/util"
 	"github.com/hibiken/asynq"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
@@ -25,9 +26,15 @@ type RedisTaskProcessor struct {
 	server *asynq.Server
 	store  db.Store
 	mailer mail.EmailSender
+	config util.Config
 }
 
-func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store, mailer mail.EmailSender) TaskProcessor {
+func NewRedisTaskProcessor(
+	redisOpt asynq.RedisClientOpt,
+	store db.Store,
+	mailer mail.EmailSender,
+	config util.Config,
+) TaskProcessor {
 	logger := NewLogger()
 	redis.SetLogger(logger)
 
@@ -50,6 +57,7 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store, mailer
 		server: server,
 		store:  store,
 		mailer: mailer,
+		config: config,
 	}
 }
 
