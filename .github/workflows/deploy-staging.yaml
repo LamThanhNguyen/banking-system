@@ -48,6 +48,14 @@ jobs:
       - name: Update kube config
         run: aws eks update-kubeconfig --region ap-southeast-1 --name banking-system-eks
 
-      - name: Deploy image to Amazon EKS
+      - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f eks/
+
+      - name: Set Image for deployment
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: banking-system
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl set image deployment/banking-system-api-deployment banking-system-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
