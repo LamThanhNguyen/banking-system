@@ -63,7 +63,7 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 	safely_code := url.QueryEscape(verifyEmail.SecretCode)
 	// TODO: replace this URL with an environment variable that points to a front-end page
 	verifyUrl := fmt.Sprintf("%s/api/v1/users/verify-email?email_id=%d&secret_code=%s",
-		processor.config.BackendDomain, verifyEmail.ID, safely_code)
+		processor.config.FrontendDomain, verifyEmail.ID, safely_code)
 	content := fmt.Sprintf(`Hello %s,<br/>
 	Thank you for registering with us!<br/>
 	Please <a href="%s">click here</a> to verify your email address.<br/>

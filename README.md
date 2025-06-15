@@ -91,6 +91,7 @@ Be Banking System. Tech: Golang, Redis, K8s, Github Actions
     EMAIL_SENDER_NAME=
     EMAIL_SENDER_ADDRESS=
     EMAIL_SENDER_PASSWORD=
+    FRONTEND_DOMAIN=
     ```
 
 ### How to generate code
