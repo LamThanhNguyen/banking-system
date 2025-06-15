@@ -48,31 +48,6 @@ jobs:
       - name: Update kube config
         run: aws eks --region ap-southeast-1 update-kubeconfig --name eks-banking-system
 
-      - name: Append GitHub Actions IAM role to aws-auth ConfigMap
-        env:
-          DEPLOY_ROLE_ARN: ${{ secrets.STAGING_GITHUB_ACTION_DEPLOY_ROLE }}
-        run: |
-          set -e
-
-          kubectl -n kube-system get configmap/aws-auth -o yaml > aws-auth.yaml
-
-          if grep -q "$DEPLOY_ROLE_ARN" aws-auth.yaml; then
-            echo "Role already present in aws-auth. Skipping patch."
-          else
-            if grep -q "mapRoles: |" aws-auth.yaml; then
-              sed -i "/mapRoles: |/a\    - rolearn: $DEPLOY_ROLE_ARN\n      username: github-actions\n      groups:\n        - system:masters" aws-auth.yaml
-            else
-              echo "mapRoles: |" >> aws-auth.yaml
-              echo "  - rolearn: $DEPLOY_ROLE_ARN" >> aws-auth.yaml
-              echo "    username: github-actions" >> aws-auth.yaml
-              echo "    groups:" >> aws-auth.yaml
-              echo "      - system:masters" >> aws-auth.yaml
-            fi
-
-            kubectl apply -f aws-auth.yaml
-            echo "Patched aws-auth with deploy role."
-          fi
-
       - name: Debug - check nodes
         run: kubectl get nodes
 
@@ -87,6 +62,3 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           kubectl set image deployment/banking-system-api-deployment banking-system-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Clean up aws-auth.yaml
-        run: rm -f aws-auth.yaml
