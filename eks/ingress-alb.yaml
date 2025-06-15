@@ -1,0 +1,6 @@
+apiVersion: networking.k8s.io/v1
+kink: IngressClass
+metadata:
+  name: banking-system-ingress-class
+spec:
+  controller: ingress.k8s.aws/alb

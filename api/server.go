@@ -72,7 +72,7 @@ func (server *Server) SetupRouter() {
 		timeoutMiddleware(requestTimeout),
 	)
 
-	if server.config.Environment != "production" {
+	if server.config.Environment == "development" {
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 

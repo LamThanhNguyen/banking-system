@@ -17,6 +17,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.32.3"
+        id: install
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -38,3 +44,18 @@ jobs:
             --build-arg ENVIRONMENT=staging \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Update kube config
+        run: aws eks update-kubeconfig --region ap-southeast-1 --name banking-system-eks
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f eks/
+
+      - name: Set Image for deployment
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: banking-system
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          kubectl set image deployment/banking-system-api-deployment banking-system-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

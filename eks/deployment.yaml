@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: banking-system-api-deployment
+  labels:
+    app: banking-system-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: banking-system-api
+  template:
+    metadata:
+      labels:
+        app: banking-system-api
+    spec:
+      containers:
+      - name: banking-system-api
+        image: $CONTAINER_IMAGE
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+          name: http-server
