@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-name: banking-system-ingress
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
-    alb.ingress.kubernetes.io/healthcheck-port: 80
+    alb.ingress.kubernetes.io/healthcheck-port: "80"
     alb.ingress.kubernetes.io/target-type: ip
     #Important Note:  Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
     # alb.ingress.kubernetes.io/healthcheck-path: /api/v1/health
