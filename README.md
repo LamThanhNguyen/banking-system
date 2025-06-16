@@ -1,154 +1,196 @@
-# banking-system
-Be Banking System. Tech: Golang, Redis, K8s, Github Actions
+# Banking System
 
-## Setup local develop
+[![Go Report Card](https://goreportcard.com/badge/github.com/LamThanhNguyen/banking-system)](https://goreportcard.com/report/github.com/LamThanhNguyen/banking-system)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Build Status](https://github.com/LamThanhNguyen/banking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/LamThanhNguyen/banking-system/actions)
 
-### Install tools
+A modern banking system built with **Golang**, **PostgreSQL**, **Redis**, **Kubernetes**, and **GitHub Actions**.  
+Implements robust authentication, authorization (RBAC, ACL, ABAC via Casbin), and scalable infrastructure.
 
-- [Migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
+---
 
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+  - [Database & Infrastructure](#database--infrastructure)
+  - [Code Generation](#code-generation)
+  - [Running the Application](#running-the-application)
+  - [Testing](#testing)
+- [Authorization & Access Control](#authorization--access-control)
+- [API Documentation](#api-documentation)
+- [Docker Usage](#docker-usage)
+- [Linting](#linting)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
+## Features
+
+- User registration and authentication (JWT)
+- Role-based, attribute-based, and access control list authorization (Casbin)
+- Account management, transfers, and transaction history
+- RESTful API with Swagger documentation
+- Database migrations and SQL code generation
+- Redis caching
+- CI/CD with GitHub Actions
+- Docker and Kubernetes ready
+
+---
+
+## Tech Stack
+
+- **Backend:** Golang
+- **Database:** PostgreSQL
+- **Cache:** Redis
+- **Authorization:** Casbin v2 (RBAC, ACL, ABAC)
+- **Migrations:** golang-migrate
+- **SQL Generation:** sqlc
+- **Testing & Mocking:** GoMock
+- **API Docs:** Swagger (swaggo)
+- **CI/CD:** GitHub Actions
+- **Containerization:** Docker, Docker Compose, Kubernetes
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Go](https://golang.org/doc/install) >= 1.18
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Make](https://www.gnu.org/software/make/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Redis](https://redis.io/)
+
+### Installation
+
+#### Install Required Tools
+
+- **Migrate** ([docs](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)):
     ```bash
-    $ curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
-    $ echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
-    $ apt-get update
-    $ apt-get install -y migrate
+    curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | sudo apt-key add -
+    echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/migrate.list
+    sudo apt-get update
+    sudo apt-get install -y migrate
     ```
 
-- [Sqlc](https://github.com/kyleconroy/sqlc#installation)
-
+- **Sqlc** ([docs](https://github.com/kyleconroy/sqlc#installation)):
     ```bash
     sudo snap install sqlc
     ```
 
-- [Gomock](https://github.com/uber-go/mock)
-
+- **GoMock** ([docs](https://github.com/uber-go/mock)):
     ```bash
     go install go.uber.org/mock/mockgen@latest
     export PATH=$PATH:$(go env GOPATH)/bin
     mockgen -version
     ```
 
-### Setup infrastructure
+### Environment Variables
 
-- Create the bank-network
+Create a `.env` file in the project root and fill in the following:
 
+```env
+ENVIRONMENT=develop
+ALLOWED_ORIGINS=["http://localhost:3000"]
+DB_SOURCE=postgresql://{{username}}:{{password}}@postgres:5432/{{database_name}}?sslmode=disable
+MIGRATION_URL=file://db/migration
+REDIS_ADDRESS=redis:6379
+HTTP_SERVER_ADDRESS=0.0.0.0:8080
+TOKEN_SYMMETRIC_KEY=2e3c226355a0770689c808684fbdca40
+ACCESS_TOKEN_DURATION=15m
+REFRESH_TOKEN_DURATION=24h
+EMAIL_SENDER_NAME=
+EMAIL_SENDER_ADDRESS=
+EMAIL_SENDER_PASSWORD=
+FRONTEND_DOMAIN=http://localhost:3000
+```
+
+### Database & Infrastructure
+
+- **Create Docker network:**
     ```bash
     make network
     ```
 
-- Start postgres container:
-
+- **Start PostgreSQL:**
     ```bash
     make postgres
     ```
 
-- Create simple_bank database:
-
+- **Create database:**
     ```bash
     make createdb
     ```
 
-- Run db migration up all versions:
-
+- **Run migrations:**
     ```bash
-    make migrateup
+    make migrateup      # Up all versions
+    make migrateup1     # Up 1 version
+    make migratedown    # Down all versions
+    make migratedown1   # Down 1 version
     ```
 
-- Run db migration up 1 version:
-
-    ```bash
-    make migrateup1
-    ```
-
-- Run db migration down all versions:
-
-    ```bash
-    make migratedown
-    ```
-
-- Run db migration down 1 version:
-
-    ```bash
-    make migratedown1
-    ```
-
-- Start the redis:
+- **Start Redis:**
     ```bash
     make redis
     ```
 
-- Create the .env file and fill in the information:
-    ```bash
-    ENVIRONMENT=develop
-    ALLOWED_ORIGINS=
-    DB_SOURCE=
-    MIGRATION_URL=
-    REDIS_ADDRESS=
-    HTTP_SERVER_ADDRESS=
-    TOKEN_SYMMETRIC_KEY=
-    ACCESS_TOKEN_DURATION=15m
-    REFRESH_TOKEN_DURATION=24h
-    EMAIL_SENDER_NAME=
-    EMAIL_SENDER_ADDRESS=
-    EMAIL_SENDER_PASSWORD=
-    FRONTEND_DOMAIN=
-    ```
+### Code Generation
 
-### How to generate code
-
-- Generate SQL CRUD with sqlc:
-
+- **Generate SQL CRUD with sqlc:**
     ```bash
     make sqlc
     ```
 
-- Create a new db migration:
+- **Create a new DB migration:**
+    ```bash
+    make new_migration name=<migration_name>
+    ```
 
-  ```bash
-  make new_migration name=<migration_name>
-  ```
-
-- Init Go module
-
+- **Initialize Go module:**
     ```bash
     go mod init github.com/LamThanhNguyen/banking-system
     ```
 
-- Install package
-
-    ```
+- **Install Go packages:**
+    ```bash
     go get github.com/some/library
-    ```
-
-- Add module requirements and sums
-
-    ```
     go mod tidy
     ```
 
-- Generate DB mock with gomock:
+- **Generate DB mocks with GoMock:**
+    ```bash
+    make mock
+    ```
 
-  ```bash
-  make mock
-  ```
+### Running the Application
 
-### How to run
+- **Run server:**
+    ```bash
+    make server
+    ```
 
-- Run server:
+### Testing
 
-  ```bash
-  make server
-  ```
+- **Run tests:**
+    ```bash
+    make test
+    ```
 
-- Run test:
-
-  ```bash
-  make test
-  ```
+---
 
 ## Authorization & Access Control
 
-The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to implement a layered model that combines:
+The API uses **Casbin v2** (Postgres-backed) to implement a layered model:
 
 |  Model    |            Used for            |                  Example                    |
 |:---------:|:------------------------------:|:-------------------------------------------:|
@@ -156,29 +198,50 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
 |  **ACL**  | One‑off user overrides         | audit-bot → accounts:read                   |
 |  **ABAC** | Attribute rules                | Depositor can update their own profile only |
 
-## API Documentations
-```
+---
+
+## API Documentation
+
+- **Generate Swagger docs:**
+    ```bash
     go install github.com/swaggo/swag/cmd/swag@latest
     echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
     source ~/.bashrc
     go get -u github.com/swaggo/gin-swagger
     go get -u github.com/swaggo/files
     swag init -g main.go --output docs
-    http://localhost:8080/swagger/index.html
-```
+    ```
+- **View docs:**  
+  Visit [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) after running the server.
 
-## Docker Container
-```
+---
+
+## Docker Usage
+
+- **Build and run:**
+    ```bash
     chmod +x start.sh
     docker build -t banking-system:latest .
     docker run --name banking-system --network bank-network -p 8080:8080 banking-system:latest
+    ```
+
+- **Run with environment variables:**
+    ```bash
     docker run --name banking-system --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE banking-system:latest
+    ```
+
+- **Docker Compose:**
+    ```bash
     docker compose build
     docker compose up
     docker compose down
+    ```
+
+- **Useful Docker commands:**
+    ```bash
     docker ps
     docker rm {container-name}
-    docker rmi {iamge-id}
+    docker rmi {image-id}
     docker container inspect {container-name}
     docker network create {network-name}
     docker network connect {network-name} {container-name}
@@ -187,21 +250,48 @@ The API uses **Casbin v2** backed by Postgres (via a custom pgx adapter) to impl
     docker stop $(docker ps -a -q)
     docker rm -f $(docker ps -a -q)
     docker rmi -f $(docker images -aq)
-```
+    ```
 
-## Linter: golangci-lint
-```
+---
+
+## Linting
+
+- **Install golangci-lint:**
+    ```bash
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.1.6
     echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
     source ~/.bashrc
+    ```
+
+- **Run linter:**
+    ```bash
     golangci-lint --version
     golangci-lint run
-```
+    ```
 
-## AWS Secrets Manager
-```
-openssl rand -hex 64
-openssl rand -hex 64 | head -c 32
-```
-```
-```
+---
+
+## Contributing
+
+Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/YourFeature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin feature/YourFeature`)
+5. Open a pull request
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Contact
+
+Maintainer: [LamThanhNguyen](https://github.com/LamThanhNguyen)  
+For questions, please open an issue or contact via GitHub.
+
+---
