@@ -446,7 +446,7 @@ paths:
       summary: Login
       tags:
       - users
-  /api/v1/users/verify_email:
+  /api/v1/users/verify-email:
     get:
       consumes:
       - application/json

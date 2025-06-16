@@ -357,7 +357,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/verify_email": {
+        "/api/v1/users/verify-email": {
             "get": {
                 "description": "Verify user email using a secret code sent via email",
                 "consumes": [

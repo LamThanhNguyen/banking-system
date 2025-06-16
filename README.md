@@ -98,7 +98,7 @@ Create a `.env` file in the project root and fill in the following:
 
 ```env
 ENVIRONMENT=develop
-ALLOWED_ORIGINS=["http://localhost:3000"]
+ALLOWED_ORIGINS=http://localhost:3000
 DB_SOURCE=postgresql://{{username}}:{{password}}@postgres:5432/{{database_name}}?sslmode=disable
 MIGRATION_URL=file://db/migration
 REDIS_ADDRESS=redis:6379
@@ -171,6 +171,14 @@ FRONTEND_DOMAIN=http://localhost:3000
     ```
 
 ### Running the Application
+- **Ensure you already install swag:**
+    ```bash
+    go install github.com/swaggo/swag/cmd/swag@latest
+    echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
+    source ~/.bashrc
+    go get -u github.com/swaggo/gin-swagger
+    go get -u github.com/swaggo/files
+    ```
 
 - **Run server:**
     ```bash
@@ -202,11 +210,6 @@ The API uses **Casbin v2** (Postgres-backed) to implement a layered model:
 
 - **Generate Swagger docs:**
     ```bash
-    go install github.com/swaggo/swag/cmd/swag@latest
-    echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    go get -u github.com/swaggo/gin-swagger
-    go get -u github.com/swaggo/files
     swag init -g main.go --output docs
     ```
 - **View docs:**  
@@ -219,20 +222,20 @@ The API uses **Casbin v2** (Postgres-backed) to implement a layered model:
 - **Build and run:**
     ```bash
     chmod +x start.sh
-    docker build -t banking-system:latest .
-    docker run --name banking-system --network bank-network -p 8080:8080 banking-system:latest
+    make build-container-local
+    make run-container-local
     ```
 
 - **Run with environment variables:**
     ```bash
-    docker run --name banking-system --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE banking-system:latest
+    docker run --rm --name banking-system-local --network bank-network -p 8080:8080 -e GIN_MODE=release -e PARAM=VALUE banking-system:local
     ```
 
 - **Docker Compose:**
+
     ```bash
-    docker compose build
-    docker compose up
-    docker compose down
+    make run-compose-local
+    make stop-compose-local
     ```
 
 - **Useful Docker commands:**
