@@ -1,8 +1,6 @@
 # Banking System
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/LamThanhNguyen/banking-system)](https://goreportcard.com/report/github.com/LamThanhNguyen/banking-system)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build Status](https://github.com/LamThanhNguyen/banking-system/actions/workflows/ci.yml/badge.svg)](https://github.com/LamThanhNguyen/banking-system/actions)
 
 A modern banking system built with **Golang**, **PostgreSQL**, **Redis**, **Kubernetes**, and **GitHub Actions**.  
 Implements robust authentication, authorization (RBAC, ACL, ABAC via Casbin), and scalable infrastructure.
