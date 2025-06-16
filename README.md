@@ -1,7 +1,7 @@
 # banking-system
 Be Banking System. Tech: Golang, Redis, K8s, Github Actions
 
-## Setup local development
+## Setup local develop
 
 ### Install tools
 
@@ -79,7 +79,7 @@ Be Banking System. Tech: Golang, Redis, K8s, Github Actions
 
 - Create the .env file and fill in the information:
     ```bash
-    ENVIRONMENT=development
+    ENVIRONMENT=develop
     ALLOWED_ORIGINS=
     DB_SOURCE=
     MIGRATION_URL=
