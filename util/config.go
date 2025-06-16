@@ -16,19 +16,25 @@ import (
 )
 
 type Config struct {
-	Environment          string        `mapstructure:"ENVIRONMENT" json:"ENVIRONMENT"`
-	AllowedOrigins       []string      `mapstructure:"ALLOWED_ORIGINS" json:"ALLOWED_ORIGINS"`
-	DBSource             string        `mapstructure:"DB_SOURCE" json:"DB_SOURCE"`
-	MigrationURL         string        `mapstructure:"MIGRATION_URL" json:"MIGRATION_URL"`
-	RedisAddress         string        `mapstructure:"REDIS_ADDRESS" json:"REDIS_ADDRESS"`
-	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS" json:"HTTP_SERVER_ADDRESS"`
-	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`
-	EmailSenderName      string        `mapstructure:"EMAIL_SENDER_NAME" json:"EMAIL_SENDER_NAME"`
-	EmailSenderAddress   string        `mapstructure:"EMAIL_SENDER_ADDRESS" json:"EMAIL_SENDER_ADDRESS"`
-	EmailSenderPassword  string        `mapstructure:"EMAIL_SENDER_PASSWORD" json:"EMAIL_SENDER_PASSWORD"`
-	FrontendDomain       string        `mapstructure:"FRONTEND_DOMAIN" json:"FRONTEND_DOMAIN"`
+	Environment          string   `mapstructure:"ENVIRONMENT" json:"ENVIRONMENT"`
+	AllowedOrigins       []string `mapstructure:"ALLOWED_ORIGINS" json:"ALLOWED_ORIGINS"`
+	DBSource             string   `mapstructure:"DB_SOURCE" json:"DB_SOURCE"`
+	MigrationURL         string   `mapstructure:"MIGRATION_URL" json:"MIGRATION_URL"`
+	RedisAddress         string   `mapstructure:"REDIS_ADDRESS" json:"REDIS_ADDRESS"`
+	HTTPServerAddress    string   `mapstructure:"HTTP_SERVER_ADDRESS" json:"HTTP_SERVER_ADDRESS"`
+	TokenSymmetricKey    string   `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  string   `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration string   `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`
+	EmailSenderName      string   `mapstructure:"EMAIL_SENDER_NAME" json:"EMAIL_SENDER_NAME"`
+	EmailSenderAddress   string   `mapstructure:"EMAIL_SENDER_ADDRESS" json:"EMAIL_SENDER_ADDRESS"`
+	EmailSenderPassword  string   `mapstructure:"EMAIL_SENDER_PASSWORD" json:"EMAIL_SENDER_PASSWORD"`
+	FrontendDomain       string   `mapstructure:"FRONTEND_DOMAIN" json:"FRONTEND_DOMAIN"`
+}
+
+type RuntimeConfig struct {
+	Config
+	AccessTokenDurationParsed  time.Duration
+	RefreshTokenDurationParsed time.Duration
 }
 
 // LoadConfig reads configuration from file or environment variables.
@@ -77,4 +83,20 @@ func LoadConfig(ctx context.Context, path string) (Config, error) {
 	default:
 		return config, errors.New("invalid ENVIRONMENT: must be one of develop/staging/production")
 	}
+}
+
+func NewRuntimeConfig(cfg Config) (RuntimeConfig, error) {
+	atd, err := time.ParseDuration(cfg.AccessTokenDuration)
+	if err != nil {
+		return RuntimeConfig{}, fmt.Errorf("invalid ACCESS_TOKEN_DURATION: %w", err)
+	}
+	rtd, err := time.ParseDuration(cfg.RefreshTokenDuration)
+	if err != nil {
+		return RuntimeConfig{}, fmt.Errorf("invalid REFRESH_TOKEN_DURATION: %w", err)
+	}
+	return RuntimeConfig{
+		Config:                     cfg,
+		AccessTokenDurationParsed:  atd,
+		RefreshTokenDurationParsed: rtd,
+	}, nil
 }

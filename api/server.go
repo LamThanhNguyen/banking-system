@@ -17,7 +17,7 @@ import (
 )
 
 type Server struct {
-	config          util.Config
+	config          util.RuntimeConfig
 	store           db.Store
 	enforcer        *casbin.Enforcer
 	router          *gin.Engine
@@ -26,7 +26,7 @@ type Server struct {
 }
 
 func NewServer(
-	config util.Config,
+	config util.RuntimeConfig,
 	store db.Store,
 	enforcer *casbin.Enforcer,
 	taskDistributor worker.TaskDistributor,

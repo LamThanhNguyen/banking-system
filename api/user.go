@@ -160,7 +160,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	accessToken, accessPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
 		user.Role,
-		server.config.AccessTokenDuration,
+		server.config.AccessTokenDurationParsed,
 		token.TokenTypeAccessToken,
 	)
 	if err != nil {
@@ -172,7 +172,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 	refreshToken, refreshPayload, err := server.tokenMaker.CreateToken(
 		user.Username,
 		user.Role,
-		server.config.RefreshTokenDuration,
+		server.config.RefreshTokenDurationParsed,
 		token.TokenTypeRefreshToken,
 	)
 	if err != nil {
