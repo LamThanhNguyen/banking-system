@@ -26,14 +26,14 @@ type RedisTaskProcessor struct {
 	server *asynq.Server
 	store  db.Store
 	mailer mail.EmailSender
-	config util.Config
+	config util.RuntimeConfig
 }
 
 func NewRedisTaskProcessor(
 	redisOpt asynq.RedisClientOpt,
 	store db.Store,
 	mailer mail.EmailSender,
-	config util.Config,
+	config util.RuntimeConfig,
 ) TaskProcessor {
 	logger := NewLogger()
 	redis.SetLogger(logger)

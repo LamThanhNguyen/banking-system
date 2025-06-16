@@ -48,15 +48,20 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	log.Info().Interface("config", config).Msg("loaded config")
+	runtimeCfg, err := util.NewRuntimeConfig(config)
+	if err != nil {
+		log.Fatal().Err(err).Msg("invalid config values")
+	}
 
-	connPool, err := pgxpool.New(ctx, config.DBSource)
+	log.Info().Interface("config", runtimeCfg).Msg("loaded config")
+
+	connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 
 	// Run migration to database
-	runDBMigration(config.MigrationURL, config.DBSource)
+	runDBMigration(runtimeCfg.MigrationURL, runtimeCfg.DBSource)
 
 	casbin_adapter, err := pgxadapter.New(ctx, connPool)
 	if err != nil {
@@ -76,15 +81,15 @@ func main() {
 	store := db.NewStore(connPool)
 
 	redisOpt := asynq.RedisClientOpt{
-		Addr: config.RedisAddress,
+		Addr: runtimeCfg.RedisAddress,
 	}
 
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runTaskProcessor(ctx, waitGroup, config, redisOpt, store)
-	runServer(ctx, waitGroup, config, store, casbin_enforcer, taskDistributor)
+	runTaskProcessor(ctx, waitGroup, runtimeCfg, redisOpt, store)
+	runServer(ctx, waitGroup, runtimeCfg, store, casbin_enforcer, taskDistributor)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -130,7 +135,7 @@ func seedPolicies(casbin_enforcer *casbin.Enforcer) error {
 func runTaskProcessor(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config util.Config,
+	config util.RuntimeConfig,
 	redisOpt asynq.RedisClientOpt,
 	store db.Store,
 ) {
@@ -156,7 +161,7 @@ func runTaskProcessor(
 func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config util.Config,
+	config util.RuntimeConfig,
 	store db.Store,
 	enforcer *casbin.Enforcer,
 	taskDistributor worker.TaskDistributor,

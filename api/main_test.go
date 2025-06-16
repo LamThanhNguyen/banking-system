@@ -45,11 +45,16 @@ func newTestServer(
 		enforcer = newTestEnforcer(t)
 	}
 
-	config := util.Config{
-		TokenSymmetricKey:   util.RandomString(32),
-		AccessTokenDuration: time.Minute,
-		AllowedOrigins:      []string{"*"},
-		Environment:         "test",
+	config := util.RuntimeConfig{
+		Config: util.Config{
+			TokenSymmetricKey:    util.RandomString(32),
+			AllowedOrigins:       []string{"*"},
+			Environment:          "test",
+			AccessTokenDuration:  "1m",
+			RefreshTokenDuration: "10m",
+		},
+		AccessTokenDurationParsed:  time.Minute,
+		RefreshTokenDurationParsed: 10 * time.Minute,
 	}
 
 	server, err := NewServer(config, store, enforcer, taskDistributor)
