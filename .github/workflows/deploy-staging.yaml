@@ -51,14 +51,11 @@ jobs:
       - name: Debug - check nodes
         run: kubectl get nodes
 
-      - name: Apply Kubernetes manifests
-        run: |
-          kubectl apply -f deployment-manifest/
-
-      - name: Set Image for deployment
+      - name: Deploy all manifests with envsubst
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: banking-system
-          IMAGE_TAG: ${{ github.sha }}
+          ENVIRONMENT: staging
+          CONTAINER_IMAGE: ${{ steps.login-ecr.outputs.registry }}/banking-system:${{ github.sha }}
         run: |
-          kubectl set image deployment/banking-system-api-deployment banking-system-api=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          for f in deployment-manifest/*.yaml; do
+            envsubst < "$f" | kubectl apply -f -
+          done
