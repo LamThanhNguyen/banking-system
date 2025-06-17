@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A modern banking system built with **Golang**, **PostgreSQL**, **Redis**, **Kubernetes**, and **GitHub Actions**.  
+A banking system built with **Golang**, **PostgreSQL**, **Redis**, **Kubernetes**, and **GitHub Actions**.  
 Implements robust authentication, authorization (RBAC, ACL, ABAC via Casbin), and scalable infrastructure.
 
 ---
