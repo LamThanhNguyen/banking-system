@@ -99,9 +99,9 @@ Create a `.env` file in the project root and fill in the following:
 ```env
 ENVIRONMENT=develop
 ALLOWED_ORIGINS=http://localhost:3000
-DB_SOURCE=postgresql://{{username}}:{{password}}@postgres:5432/{{database_name}}?sslmode=disable
+DB_SOURCE=postgresql://{{username}}:{{password}}@localhost:5432/{{database_name}}?sslmode=disable
 MIGRATION_URL=file://db/migration
-REDIS_ADDRESS=redis:6379
+REDIS_ADDRESS=localhost:6379
 HTTP_SERVER_ADDRESS=0.0.0.0:8080
 TOKEN_SYMMETRIC_KEY=2e3c226355a0770689c808684fbdca40
 ACCESS_TOKEN_DURATION=15m
@@ -176,8 +176,9 @@ FRONTEND_DOMAIN=http://localhost:3000
     go install github.com/swaggo/swag/cmd/swag@latest
     echo 'export PATH="$(go env GOPATH)/bin:$PATH"' >> ~/.bashrc
     source ~/.bashrc
-    go get -u github.com/swaggo/gin-swagger
-    go get -u github.com/swaggo/files
+    swag --version
+    // go get -u github.com/swaggo/gin-swagger
+    // go get -u github.com/swaggo/files
     ```
 
 - **Run server:**

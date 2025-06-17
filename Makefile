@@ -51,7 +51,12 @@ build-container-local:
 	docker build -t banking-system:local -f Dockerfile.local .
 
 run-container-local:
-	docker run --rm --name banking-system-local --network bank-network -p 8080:8080 banking-system:local
+	docker run --rm --name banking-system-local \
+	--network bank-network \
+	-p 8080:8080 \
+    -e DB_SOURCE=postgresql://root:secret@postgres:5432/banking_system?sslmode=disable \
+    -e REDIS_ADDRESS=redis:6379 \
+    banking-system:local
 
 run-compose-local:
 	docker compose -f docker-compose-local.yaml up --build
@@ -59,19 +64,4 @@ run-compose-local:
 stop-compose-local:
 	docker compose -f docker-compose-local.yaml down
 
-build-container-deploy:
-	docker build -t banking-system:deploy -f Dockerfile.deploy .
-
-run-container-deploy:
-	docker run --rm --name banking-system-deploy --network bank-network -p 8080:8080 \
-	-e ENVIRONMENT=staging \
-	-e AWS_REGION=ap-southeast-1 \
-	banking-system:deploy
-
-run-compose-deploy:
-	docker compose -f docker-compose-deploy.yaml up --build
-
-stop-compose-deploy:
-	docker compose -f docker-compose-deploy.yaml down
-
-.PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration sqlc test build server mock redis build-container-local run-container-local run-compose-local stop-compose-local build-container-deploy run-container-deploy run-compose-deploy stop-compose-deploy
+.PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration sqlc test build server mock redis build-container-local run-container-local run-compose-local stop-compose-local
