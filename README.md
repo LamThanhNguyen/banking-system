@@ -23,9 +23,7 @@ Implements robust authentication, authorization (RBAC, ACL, ABAC via Casbin), an
 - [API Documentation](#api-documentation)
 - [Docker Usage](#docker-usage)
 - [Linting](#linting)
-- [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 
 ---
 
