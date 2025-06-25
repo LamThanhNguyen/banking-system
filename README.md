@@ -273,27 +273,8 @@ The API uses **Casbin v2** (Postgres-backed) to implement a layered model:
 
 ---
 
-## Contributing
-
-Contributions are welcome! Please open issues or submit pull requests for improvements and bug fixes.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/YourFeature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin feature/YourFeature`)
-5. Open a pull request
-
----
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-## Contact
-
-Maintainer: [LamThanhNguyen](https://github.com/LamThanhNguyen)  
-For questions, please open an issue or contact via GitHub.
 
 ---
